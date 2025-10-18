@@ -1,5 +1,6 @@
 from wires import Wire, Bus, Register
 from enum import Enum
+from logs import log
 
 # Arithmetic and logic unit
 # Connections: params p, q
@@ -30,14 +31,18 @@ class Alu:
         self.emulator = AluEmulator()
 
     def execute(self):
-        bin_str = create_bin_str(
-            self.func.read_data(), self.acc.data, self.q.read_data()
-        )
+        acc = self.acc.data
+        q = self.q.data
+        func = self.func.read_data
 
-        result = self.emulator.run(bin_str)
+        log.log_alu_calculating(acc, q, func)
+
+        result = self.emulator.run(create_bin_str(func, acc, q))
 
         self.acc.data = result >> 3
         self.ccr.set_data(result & 0b111)
+
+        log.log_alu_result(result >> 3, result & 0b111)
 
 
 def create_bin_str(func, acc, q):
@@ -92,7 +97,7 @@ class AluEmulator:
         result = self.truncate_result(result)
 
         zero = result == 0
-        neg = result &(1<<15) == 1
+        neg = result & (1 << 15) == 1
 
         return self.append_ccr(result, zero, carry, neg)
 

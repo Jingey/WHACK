@@ -1,5 +1,5 @@
 from alu import Alu
-from wires import Register, Bus, Wire, BusSwitch, BusCopier, Incrementer, FeStatus
+from wires import Register, Bus, Wire, BusCopier, Incrementer, FeStatus
 from main_storage import MainStorage
 from inout import Input, Output
 from cu import Cu
@@ -7,52 +7,52 @@ from computer import Computer
 
 
 def build_computer(data: list[int]) -> Computer:
-    main_bus = Bus()
-    clock = Wire()
-    halt = Wire()
+    main_bus = Bus("main_bus")
+    clock = Wire("clock")
+    halt = Wire("halt")
 
-    cu_bus = Bus()
-    cu_bus_output = Wire()
+    cu_bus = Bus("cu_bus")
+    cu_bus_output = Wire("cu_bus_output")
     BusCopier(cu_bus, main_bus, cu_bus_output)
 
-    func_bus = Bus()
-    alu_enable = Wire()
+    func_bus = Bus("alu_func_bus")
+    alu_enable = Wire("alu_enable")
 
     alu = Alu(main_bus, func_bus, alu_enable)
 
-    acc_read = Wire()
-    acc_write = Wire()
-    acc = Register(main_bus, main_bus, acc_read, acc_write)
+    acc_read = Wire("acc_read")
+    acc_write = Wire("acc_write")
+    acc = Register("acc", main_bus, main_bus, acc_read, acc_write)
 
-    r1_read = Wire()
-    r1_write = Wire()
-    r1 = Register(main_bus, main_bus, r1_read, r1_write)
+    r1_read = Wire("r1_read")
+    r1_write = Wire("r1_write")
+    r1 = Register("r1", main_bus, main_bus, r1_read, r1_write)
 
-    r2_read = Wire()
-    r2_write = Wire()
-    r2 = Register(main_bus, main_bus, r2_read, r2_write)
+    r2_read = Wire("r2_read")
+    r2_write = Wire("r2_write")
+    r2 = Register("r2", main_bus, main_bus, r2_read, r2_write)
 
-    main_store_enable = Wire()
-    addr_bus = Bus()
-    mar_enable = Wire()
+    main_store_enable = Wire("main_store_enable")
+    addr_bus = Bus("addr_bus")
+    mar_enable = Wire("mar_enable")
     BusCopier(main_bus, addr_bus, mar_enable)
-    rw_bus = Bus()
+    rw_bus = Bus("rw_bus")
     main_store = MainStorage(main_store_enable, addr_bus, main_bus, rw_bus)
 
-    cir_read = Wire()
-    cir_write = Wire()
-    cir = Register(main_bus, main_bus, cir_read, cir_write)
+    cir_read = Wire("cir_read")
+    cir_write = Wire("cir_write")
+    cir = Register("cir", main_bus, main_bus, cir_read, cir_write)
 
-    pc_read = Wire()
-    pc_write = Wire()
-    pc = Register(main_bus, main_bus, pc_read, pc_write)
-    pc_increment = Wire()
+    pc_read = Wire("pc_read")
+    pc_write = Wire("pc_write")
+    pc = Register("pc", main_bus, main_bus, pc_read, pc_write)
+    pc_increment = Wire("pc_increment")
     Incrementer(pc, pc_increment)
 
-    read_input = Wire()
+    read_input = Wire("read_input")
     input_reg = Input(read_input, main_bus)
 
-    write_output = Wire()
+    write_output = Wire("write_input")
     output_reg = Output(write_output, main_bus)
 
     ccr = alu.ccr

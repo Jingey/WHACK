@@ -1,4 +1,5 @@
 from wires import Wire, Bus
+from logs import log
 
 
 class MainStorage:
@@ -21,10 +22,15 @@ class MainStorage:
             self.write()
 
     def read(self):
-        self.data_bus.set_data(self.mem[self.address_bus.read_data()])
+        addr = self.address_bus.read_data()
+        log.log_ms_load(addr, self.mem[addr])
+        self.data_bus.set_data(self.mem[addr])
 
     def write(self):
-        self.mem[self.address_bus.read_data()] = self.data_bus.read_data()
+        addr = self.address_bus.read_data()
+        data = self.data_bus.read_data()
+        log.log_ms_save(addr, data)
+        self.mem[addr] = data
 
     def load(self, data):
         self.mem = data + [0] * abs((2**16) - len(data))
