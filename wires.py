@@ -67,9 +67,9 @@ class Register:
     def __init__(self, in_bus: Bus, out_bus: Bus, read: Wire, write: Wire):
         self.in_bus = in_bus
         self.out_bus = out_bus
-        self.data = []
-        read.enlist(lambda _: self.read)
-        write.enlist(lambda _: self.write)
+        self.data = 0
+        read.enlist(self.read)
+        write.enlist(self.write)
 
     def read(self):
         self.data = self.in_bus.data

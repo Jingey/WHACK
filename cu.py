@@ -21,13 +21,35 @@ class Opcode(Enum):
 
 class Cu:
     def __init__(
-            self, enable: Wire, cu_bus: Bus, cu_bus_output: Wire, func_bus: Bus, alu_enable: Wire,
-            acc_in_select: Wire, acc_out_select: Wire, acc_read: Wire, acc_write: Wire, r1: Register, r2: Register,
-            mar_enable: Wire, main_store_enable: Wire, rw_bus: Bus, cir_read: Wire, cir_write: Wire, pc_read: Wire,
-            pc_write: Wire, pc_increment: Wire, read_input: Wire, write_output: Wire, reset_cycle: Register, halt: Wire,
-            cir: Register, clock: Register, ccr: Register, fe_status: Register
+        self,
+        cu_bus: Bus,
+        cu_bus_output: Wire,
+        func_bus: Bus,
+        alu_enable: Wire,
+        acc_in_select: Wire,
+        acc_out_select: Wire,
+        acc_read: Wire,
+        acc_write: Wire,
+        r1_read: Wire,
+        r1_write: Wire,
+        r2_write: Wire,
+        r2_read: Wire,
+        mar_enable: Wire,
+        main_store_enable: Wire,
+        rw_bus: Bus,
+        cir_read: Wire,
+        cir_write: Wire,
+        pc_read: Wire,
+        pc_write: Wire,
+        pc_increment: Wire,
+        read_input: Wire,
+        write_output: Wire,
+        halt: Wire,
+        cir: Register,
+        clock: Wire,
+        ccr: Register,
+        fe_status: Register,
     ):
-        self.enable = enable
         self.cu_bus = cu_bus
         self.cu_bus_output = cu_bus_output
         self.func_bus = func_bus
@@ -38,8 +60,10 @@ class Cu:
         self.acc_write = acc_write
 
         # General purpose registers
-        self.r1 = r1
-        self.r2 = r2
+        self.r1_read = r1_read
+        self.r1_write = r1_write
+        self.r2_read = r2_read
+        self.r2_write = r2_write
 
         self.mar_enable = mar_enable
         self.main_store_enable = main_store_enable
@@ -55,7 +79,6 @@ class Cu:
         self.read_input = read_input
         self.write_output = write_output
 
-        self.reset_cycle = reset_cycle
         self.halt = halt
 
         # Inputs
@@ -63,6 +86,8 @@ class Cu:
         self.clock = clock
         self.ccr = ccr
         self.fe_status = fe_status
+
+        self.clock.enlist(self.run)
 
     def run(self):
         match self.fe_status.data:

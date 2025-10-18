@@ -1,4 +1,4 @@
-from .wires import Wire, Bus
+from wires import Wire, Bus
 
 
 class MainStorage:
@@ -11,8 +11,8 @@ class MainStorage:
         self.address_bus = address_bus
         self.data_bus = data_bus
         self.rw_bus = rw_bus
-        self.mem = [0] * (2 ** 16)
-        self.enable.enlist(lambda data: self.execute())
+        self.mem = [0] * (2**16)
+        self.enable.enlist(self.execute)
 
     def execute(self):
         if self.rw_bus.read_data() == 1:
@@ -27,4 +27,4 @@ class MainStorage:
         self.mem[self.address_bus.read_data()] = self.data_bus.read_data()
 
     def load(self, data):
-        self.mem = data
+        self.mem = data + [0] * abs((2**16) - len(data))
