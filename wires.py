@@ -19,11 +19,28 @@ class Bus:
     def __init__(self, data: int = 0):
         self.data = data
 
-    def set(self, data):
+    def set_data(self, data):
         tmp = self.data
         self.data = data
 
         return tmp
+
+    def read_data(self):
+        return self.data
+
+
+# for hooking together multiple buses
+# works as a multiplexer/demultiplexer
+class BusSwitch(Bus):
+    def __init__(self, buses: list[Bus], switch_bus: Bus):
+        self.buses = buses
+        self.switch_bus = switch_bus
+
+    def set_data(self, data):
+        return self.buses[self.switch_bus.read_data()].set_data(data)
+
+    def read_data(self):
+        return self.buses[self.switch_bus.read_data()].read_data()
 
 
 class Register:

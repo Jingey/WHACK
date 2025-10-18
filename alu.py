@@ -34,22 +34,22 @@ class Alu:
                 self.NOP()
 
     def add(self):
-        self.out.set(self.p.data + self.q.data)
+        self.out.set_data(self.p.data + self.q.data)
 
     def subtract(self):
-        self.out.set(self.p.data - self.q.data)
+        self.out.set_data(self.p.data - self.q.data)
 
     def shift(self):
-        self.out.set(self.p.data >> self.q.data)
+        self.out.set_data(self.p.data >> self.q.data)
 
     def NOT(self):
-        self.out.set(0b11111111_11111111 - self.p.data)
+        self.out.set_data(0b11111111_11111111 - self.p.data)
 
     def AND(self):
-        self.out.set(self.p.data & self.q.data)
+        self.out.set_data(self.p.data & self.q.data)
 
     def OR(self):
-        self.out.set(self.p.data | self.q.data)
+        self.out.set_data(self.p.data | self.q.data)
 
     def NOP(self):
         return
