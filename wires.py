@@ -1,6 +1,6 @@
 class Wire:
-    def __init__(self, funcs=list):
-        self.funcs = funcs
+    def __init__(self, funcs=None):
+        self.funcs: list = funcs if funcs is not None else []
 
     def callAll(self, data):
         for func in self.funcs:
@@ -14,8 +14,9 @@ class Wire:
     def delist(self, func):
         self.funcs.remove(func)
 
-class Register:
-    def __init__(self, data=list):
+
+class Bus:
+    def __init__(self, data=int):
         self.data = data
 
     def set(self, data):
@@ -23,3 +24,21 @@ class Register:
         self.data = data
 
         return tmp
+
+
+class Register:
+    def __init__(self, inBus: Bus, outBus: Bus, read: Wire, write: Wire):
+        self.inBus = inBus
+        self.outBus = outBus
+        self.data = []
+        read.enlist(lambda _: self.read)
+        write.enlist(lambda _: self.write)
+
+    def read(self):
+        self.data = self.inBus.data
+
+    def write(self):
+        self.outBus.data = self.data
+
+    def clear(self):
+        self.data = 0
