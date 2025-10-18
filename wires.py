@@ -7,12 +7,9 @@ class Wire:
         for func in self.funcs:
             func()
 
-<<<<<<< Updated upstream
-=======
         for func in self.late_funcs:
             func()
 
->>>>>>> Stashed changes
     def enlist(self, func):
         self.funcs.append(func)
 
