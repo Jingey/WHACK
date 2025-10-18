@@ -1,4 +1,4 @@
-from wires import Wire, Bus
+from wires import Wire
 from inout import Input, Output
 
 
