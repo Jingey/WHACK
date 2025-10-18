@@ -1,4 +1,4 @@
-from models.randomdata import genData
+from randomdata import genData
 import tensorflow as tf
 import pandas as pd
 
@@ -10,8 +10,8 @@ train_df = df.sample(frac=0.75)
 validation_df = df.drop(train_df.index)
 
 
-maxVal = train_df.max(axis=0) #max alon columns
-minVal = train_df.min(axis=0)
+maxVal = train_df.max(axis=1) #max alon columns
+minVal = train_df.min(axis=1)
 rng = maxVal - minVal
 print("min",minVal, "\n")
 print("max", maxVal, "\n")
@@ -24,7 +24,7 @@ validation_df = (validation_df - minVal)/rng
 train_df.to_csv("traindb.csv");
 
 
-inp_train = train_df.drop('out', axis=1) # drop output per row
+inp_train = train_df.drop('out', axis=1) # drop output column
 inp_valid = validation_df.drop('out', axis=1)
 
 
@@ -72,8 +72,8 @@ print("Evaluate")
 genData("modelTest.csv")
 df2 = pd.read_csv("modelTest.csv", index_col=False)
 
-mi = df2.min(axis=0)
-ma = df2.max(axis=0)
+mi = df2.min(axis=1)
+ma = df2.max(axis=1)
 r = ma-mi
 
 df2 = (df2 - mi)/r
