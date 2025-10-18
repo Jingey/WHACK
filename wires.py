@@ -16,7 +16,7 @@ class Wire:
 
 
 class Bus:
-    def __init__(self, data=int):
+    def __init__(self, data: int = 0):
         self.data = data
 
     def set(self, data):
