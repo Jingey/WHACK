@@ -30,7 +30,7 @@ class Alu:
         self.emulator = AluEmulator()
 
     def execute(self):
-        bin_str = self.create_bin_str(
+        bin_str = create_bin_str(
             self.func.read_data(), self.acc.data, self.q.read_data()
         )
 
