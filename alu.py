@@ -1,30 +1,55 @@
+from .wires import Wire, Bus
+
 # Arithmetic and logic unit
 # Connections: params p, q
 # Functions: +, -, shift, not, and, or
 
 
 class alu:
-    def __init__(self, pBus, qBus, funcBus, enable, out):
-        self.p = pBus
-        self.q = qBus
-        self.func = funcBus
+    def __init__(
+        self, p_bus: Bus, q_bus: Bus, func_bus: Bus, enable: Wire, out_bus: Bus
+    ):
+        self.p = p_bus
+        self.q = q_bus
+        self.func = func_bus
         self.enable = enable
-        self.out = out
+        self.enable.enlist(lambda data: self.execute())
+        self.out = out_bus
+
+    def execute(self):
+        match self.func.data:
+            case 0:
+                self.add()
+            case 1:
+                self.subtract()
+            case 2:
+                self.shift()
+            case 3:
+                self.NOT()
+            case 4:
+                self.AND()
+            case 5:
+                self.OR()
+            case _:
+                self.NOP()
 
     def add(self):
-        return 0
+        self.out.set(self.p.data + self.q.data)
 
     def subtract(self):
-        return 0
+        self.out.set(self.p.data - self.q.data)
 
     def shift(self):
-        return 0   
+        self.out.set(self.p.data >> self.q.data)
 
     def NOT(self):
-        return 0
-    
+        self.out.set(0b11111111_11111111 - self.p.data)
+
     def AND(self):
-        return 0
-    
+        self.out.set(self.p.data & self.q.data)
+
     def OR(self):
-        return 0
+        self.out.set(self.p.data | self.q.data)
+
+    def NOP(self):
+        return
