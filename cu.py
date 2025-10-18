@@ -10,18 +10,22 @@ class Opcode(Enum):
     AND = 3
     NOT = 4
     LDA = 5
-    JMP = 6
-    INP = 7
-    OUT = 8
+    STR = 6
+    SUB = 7
+    JMP = 8
+    INP = 9
+    OUT = 10
+    NOP = 11
+    JMPN = 12
 
 
 class Cu:
-
     def __init__(
             self, enable: Wire, cu_bus: Bus, cu_bus_output: Wire, func_bus: Bus, alu_enable: Wire,
             acc_in_select: Wire, acc_out_select: Wire, acc_read: Wire, acc_write: Wire, r1: Register, r2: Register,
-            mar_enable: Wire, main_store_enable: Wire, rw_bus: Bus, cir_read: Wire, cir_write: Wire, pc_read: Wire, pc_write: Wire, pc_increment: Wire,
-            read_input: Wire, write_output: Wire, reset_cycle: Register, halt: Wire
+            mar_enable: Wire, main_store_enable: Wire, rw_bus: Bus, cir_read: Wire, cir_write: Wire, pc_read: Wire,
+            pc_write: Wire, pc_increment: Wire, read_input: Wire, write_output: Wire, reset_cycle: Register, halt: Wire,
+            cir: Register, clock: Register, ccr: Register, fe_status: Register
     ):
         self.enable = enable
         self.cu_bus = cu_bus
@@ -54,15 +58,41 @@ class Cu:
         self.reset_cycle = reset_cycle
         self.halt = halt
 
-    def load_next_instruction(self):
+        # Inputs
+        self.cir = cir
+        self.clock = clock
+        self.ccr = ccr
+        self.fe_status = fe_status
+
+    def run(self):
+        match self.fe_status.data:
+            case 0:
+                self.prefetch()
+            case 1:
+                self.fetch()
+            case 2:
+                self.execute_1()
+            case 3:
+                self.execute_2()
+
+    def prefetch(self):
         # Send pc to mar.
-        self.mar_enable.enlist(self.pc_write.enable())
+        self.pc_write.enable()
+        self.mar_enable.enable()
+
+        self.rw_bus.set_data(1)
 
         # Increment pc
         self.pc_increment.enable()
 
     def fetch(self):
-        pass
+        self.main_store_enable.enable()
 
-    def execute(self):
-        pass
+        self.cir_read.enable()
+
+    def execute_1(self):
+        print(self.cir.data)
+
+    def execute_2(self):
+        if self.cir.data == 0:
+            self.halt.enable()
