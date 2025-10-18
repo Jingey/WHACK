@@ -120,35 +120,35 @@ class Cu:
         operand = instruction & 0b1111_11111111
 
         match op_code:
-            case Opcode.HLT:
+            case Opcode.HLT.value:
                 self.halt()
-            case Opcode.JMP:
+            case Opcode.JMP.value:
                 self.jmp_1(operand)
-            case Opcode.JEZ:
+            case Opcode.JEZ.value:
                 self.jmp_ez_1(operand)
-            case Opcode.JNZ:
+            case Opcode.JNZ.value:
                 self.jmp_nvg_1(operand)
-            case Opcode.STR:
+            case Opcode.STR.value:
                 self.str_1(operand)
-            case Opcode.LDR:
+            case Opcode.LDR.value:
                 self.ldr_1(operand)
-            case Opcode.MOV:
+            case Opcode.MOV.value:
                 self.mov_1(operand)
-            case Opcode.LS:
+            case Opcode.LS.value:
                 self.ls_1(operand)
-            case Opcode.ADD:
+            case Opcode.ADD.value:
                 self.add_1(operand)
-            case Opcode.SUB:
+            case Opcode.SUB.value:
                 self.sub_1(operand)
-            case Opcode.AND:
+            case Opcode.AND.value:
                 self.and_1(operand)
-            case Opcode.OR:
+            case Opcode.OR.value:
                 self.or_1(operand)
-            case Opcode.NOT:
+            case Opcode.NOT.value:
                 self.not_1(operand)
-            case Opcode.INP:
+            case Opcode.INP.value:
                 self.inp_1(operand)
-            case Opcode.OUT:
+            case Opcode.OUT.value:
                 self.out_1(operand)
 
             case _:
@@ -160,9 +160,9 @@ class Cu:
         op_code = instruction >> 12
         operand = instruction & 0b1111_11111111
         match op_code:
-            case Opcode.STR:
+            case Opcode.STR.value:
                 self.str_2(operand)
-            case Opcode.LDR:
+            case Opcode.LDR.value:
                 self.ldr_2(operand)
 
     def halt_1(self):
