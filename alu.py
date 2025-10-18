@@ -13,7 +13,7 @@ class Alu:
         self.q = q_bus
         self.func = func_bus
         self.enable = enable
-        self.enable.enlist(lambda data: self.execute())
+        self.enable.enlist(self.execute)
         self.out = out_bus
 
     def execute(self):

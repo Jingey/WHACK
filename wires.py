@@ -2,9 +2,9 @@ class Wire:
     def __init__(self, funcs=None):
         self.funcs: list = funcs if funcs is not None else []
 
-    def call_all(self, data):
+    def enable(self):
         for func in self.funcs:
-            func(data)
+            func()
 
         self.funcs = []
 
@@ -44,18 +44,18 @@ class BusSwitch(Bus):
 
 
 class Register:
-    def __init__(self, inBus: Bus, outBus: Bus, read: Wire, write: Wire):
-        self.inBus = inBus
-        self.outBus = outBus
+    def __init__(self, in_bus: Bus, out_bus: Bus, read: Wire, write: Wire):
+        self.in_bus = in_bus
+        self.out_bus = out_bus
         self.data = []
         read.enlist(lambda _: self.read)
         write.enlist(lambda _: self.write)
 
     def read(self):
-        self.data = self.inBus.data
+        self.data = self.in_bus.data
 
     def write(self):
-        self.outBus.data = self.data
+        self.out_bus.data = self.data
 
     def clear(self):
         self.data = 0
