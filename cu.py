@@ -33,8 +33,8 @@ class Cu:
         acc_write: Wire,
         r1_read: Wire,
         r1_write: Wire,
-        r2_write: Wire,
         r2_read: Wire,
+        r2_write: Wire,
         mar_enable: Wire,
         main_store_enable: Wire,
         rw_bus: Bus,
@@ -48,7 +48,7 @@ class Cu:
         halt: Wire,
         cir: Register,
         clock: Wire,
-        ccr: Register,
+        ccr: Bus,
         fe_status: Register,
     ):
         self.cu_bus = cu_bus
@@ -180,12 +180,12 @@ class Cu:
 
     def jmp_ez_1(self, operand):
         # if last calculation is zero
-        if self.ccr & 0b100 == 0:
+        if self.ccr.read_data() & 0b100 == 0:
             self.jmp_1(operand)
 
     def jmp_nvg_1(self, operand):
         # if last calculation is negative
-        if self.ccr & 0b001 == 0:
+        if self.ccr.read_data() & 0b001 == 0:
             self.jmp_1(operand)
 
     def send_to_register(self, destination_register):
@@ -282,7 +282,7 @@ class Cu:
         self.binary_operation(ALUFunction.ADD, operand)
 
     def sub_1(self, operand):
-        self.binary_operation(ALUFunction.ADD, operand)
+        self.binary_operation(ALUFunction.SUB, operand)
 
     def and_1(self, operand):
         self.binary_operation(ALUFunction.AND, operand)
@@ -298,7 +298,6 @@ class Cu:
         self.read_input.enable()
 
         self.send_to_register((operand >> 11) & 1)
-
 
     def out_1(self, operand):
         self.send_from_register((operand >> 11) & 1)
