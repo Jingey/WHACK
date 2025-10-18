@@ -3,7 +3,7 @@ import tensorflow as tf
 import pandas as pd
 
 genData("testcsv.csv")
-df = pd.read_csv("testcsv.csv")
+df = pd.read_csv("testcsv.csv", index_col=False)
 
 
 train_df = df.sample(frac=0.75)
