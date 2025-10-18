@@ -156,8 +156,14 @@ class Cu:
                 return
 
     def execute_2(self):
-        if self.cir.data == 0:
-            self.halt.enable()
+        instruction = self.cir.data
+        op_code = instruction >> 12
+        operand = instruction & 0b1111_11111111
+        match op_code:
+            case Opcode.STR:
+                self.str_2(operand)
+            case Opcode.LDR:
+                self.ldr_2(operand)
 
     def halt_1(self):
         self.halt.enable()
@@ -262,11 +268,21 @@ class Cu:
         self.func_bus.set_data(ALUFunction.SHIFT)
         self.alu_enable.enable()
 
+    def binary_operation(self, function, operand):
+        form = operand >> 11
+        if form == 0:
+            self.send_from_register((operand >> 10 & 0b1))
+        else:
+            self.write_to_main_bus(operand & ((1 << 11) - 1))
+
+        self.func_bus.set_data(function)
+        self.alu_enable.enable()
+
     def add_1(self, operand):
-        pass
+        self.binary_operation(ALUFunction.ADD, operand)
 
     def sub_1(self, operand):
-        pass
+        self.binary_operation(ALUFunction.ADD, operand)
 
     def and_1(self, operand):
         pass
