@@ -6,7 +6,7 @@ from genAluData import getAluData
 class AluModel:
     def __init__(self):
         self.FILENAME = "ALUDATA.csv"
-        self.SIZE = 10000
+        self.SIZE = 100_000
         self.COLNAMES = []
         self.INPUTS = []
         self.OUTPUTS = []
@@ -37,7 +37,7 @@ class AluModel:
             tf.keras.layers.Input(shape=(self.train_in.shape[1],)),
             tf.keras.layers.Dense(64, activation="relu"),
             tf.keras.layers.Dense(48, activation="relu"),
-            tf.keras.layers.Dense(32, activation="relu"),
+            tf.keras.layers.Dense(35, activation="relu"),
             tf.keras.layers.Dense(19, activation="relu"),
 
         ])
@@ -102,5 +102,5 @@ class AluModel:
 
 model = AluModel()
 model.compileModel()
-model.makeModel(100, 4096)
+model.makeModel(1000, 8000)
 model.evaluateModel()
