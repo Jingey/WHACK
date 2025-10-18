@@ -1,4 +1,4 @@
-from randomdata import genData
+from models.randomdata import genData
 import tensorflow as tf
 import pandas as pd
 

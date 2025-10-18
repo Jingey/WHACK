@@ -45,7 +45,7 @@ def create_bin_str(func, acc, q):
 
 
 def test_emulator(emulator, func, acc, q):
-    res = emulator.run(func.value, acc, q)
+    res = emulator.run(create_bin_str(func.value, acc, q))
     data = res >> 3
     ccr = res & 0b111
 
@@ -92,7 +92,7 @@ class AluEmulator:
         result = self.truncate_result(result)
 
         zero = result == 0
-        neg = result < 0
+        neg = result &(1<<15) == 1
 
         return self.append_ccr(result, zero, carry, neg)
 
