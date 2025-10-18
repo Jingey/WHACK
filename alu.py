@@ -7,10 +7,6 @@ from logs import log
 # Functions: +, -, shift, not, and, or
 
 
-MAX_VAL = 32_767
-MIN_VAL = -32_768
-
-
 class ALUFunction(Enum):
     ADD = 0b000
     SUB = 0b001
@@ -55,6 +51,7 @@ def test_emulator(emulator, func, acc, q):
     ccr = res & 0b111
 
     print(f"result: {data} ({bin(data)}), ccr:{bin(ccr)} (Z, C, N)")
+    return (data, ccr)
 
 
 class AluEmulator:
@@ -62,7 +59,7 @@ class AluEmulator:
         pass
 
     # 3 bit function | 16 bit acc | 16 bit bus
-    # outputs 16 bits | 3 bit CCR
+    # outputs 16 bits | 3 bit CCR (Z, C, N)
     def run(self, binary_input: int):
         function = binary_input >> 32
         left = (binary_input >> 16) & 0xFF_FF
@@ -84,25 +81,26 @@ class AluEmulator:
             case _:
                 return left
 
-    def append_ccr(self, result, zero, carry, neg):
-        return (result << 3) | (zero << 2 | carry << 1 | neg)
+    def append_ccr(self, result, zero, neg):
+        return (result << 3) | (zero << 2 | neg)
 
     def truncate_result(self, result):
-        if result & (1 << 15) == 0:
-            return result % MAX_VAL
-        return -(~(result & ((1 << 15) - 1)) + 1)
+        return result & ((1 << 16) - 1)
 
     def format_result(self, result):
-        carry = result > MAX_VAL or result < MIN_VAL
         result = self.truncate_result(result)
 
         zero = result == 0
-        neg = result & (1 << 15) == 1
+        neg = (result & (1 << 15)) != 0
 
-        return self.append_ccr(result, zero, carry, neg)
+        return self.append_ccr(result, zero, neg)
 
     def add(self, left, right):
-        return self.format_result(left + right)
+        # set carry
+        result = self.format_result(left + right)
+        if left + right > 0xFF_FF:
+            return result | 0b10
+        return result
 
     def subtract(self, left, right):
         return self.format_result(left - right)

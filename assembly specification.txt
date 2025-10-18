@@ -40,12 +40,12 @@ ADD - 1000
 SUB - 1001, AND - 1010, OR - 1011
     the same as ADD
 
-NOT - 11000
+NOT - 1100
     inverts acc, takes no operands
 
 INP - 1101
     moves a character from the input queue to a register
-    INP R1
+    INP R1 // -> 1101_0_xxxxxxxxxxx
 
 OUT - 1110
     moves a character from the register to the output buffer
