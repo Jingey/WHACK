@@ -2,6 +2,8 @@ from genData import genData
 import tensorflow as tf
 import pandas as pd
 from genAluData import getAluData
+import numpy as np
+
 
 class AluModel:
     def __init__(self):
@@ -38,9 +40,11 @@ class AluModel:
             tf.keras.layers.Dense(64, activation="relu"),
             tf.keras.layers.Dense(48, activation="relu"),
             tf.keras.layers.Dense(35, activation="relu"),
+    #    ] + [tf.keras.layers.Dense(35, activation="relu") for i in range(9)] +[
             tf.keras.layers.Dense(19, activation="relu"),
 
         ])
+
 
         print(self.model.summary())
 
@@ -55,24 +59,14 @@ class AluModel:
         df = pd.read_csv(filename, index_col=False)
         train_df = df.sample(frac=0.75)
         validation_df = df.drop(train_df.index)
-
-        # Data normalisation
-
-        # minVal = train_df.min(axis=0) # Get min value aloing columns
-        # maxVal = train_df.max(axis=0)
-        # rng = maxVal - minVal
-
-        # train_df = (train_df - minVal)/rng
-        # validation_df = (validation_df - minVal)/rng
-
         return train_df, validation_df
 
     def compileModel(self):
         self.model.compile(
             optimizer = tf.keras.optimizers.RMSprop(),
             loss = tf.keras.losses.MeanSquaredError(), # Because gives calculate in range [0,1)
-            metrics  = [tf.keras.metrics.BinaryAccuracy(name="binary_accuracy", dtype=None, threshold=0.5)]# Can't calculate accuracy be == because it will never the same exact calculation
-        )
+            metrics  = [tf.keras.metrics.BinaryAccuracy(name="binary_accuracy", dtype=None, threshold=0.5)]
+            )
     
     def makeModel(self, E, B):
         losses = self.model.fit(
@@ -102,5 +96,5 @@ class AluModel:
 
 model = AluModel()
 model.compileModel()
-model.makeModel(1000, 8000)
+model.makeModel(800, 8000)
 model.evaluateModel()
