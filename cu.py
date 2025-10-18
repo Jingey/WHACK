@@ -4,19 +4,20 @@ from wires import Wire, Bus, Register
 
 
 class Opcode(Enum):
-    HLT = 0
-    ADD = 1
-    XOR = 2
-    AND = 3
-    NOT = 4
-    LDA = 5
-    STR = 6
-    SUB = 7
-    JMP = 8
-    INP = 9
-    OUT = 10
-    NOP = 11
-    JMPN = 12
+    NOP = 0b0000
+    JMP = 0b0001
+    JEZ = 0b0010
+    JNV = 0b0011
+    STR = 0b0100
+    LDR = 0b0101
+    MOV = 0b0110
+    LS = 0b0111
+    ADD = 0b1000
+    SUB = 0b1001
+    AND = 0b1010
+    OR = 0b1011
+    NOT = 0b1100
+    HLT = 0b1111
 
 
 class Cu:
