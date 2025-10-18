@@ -43,6 +43,18 @@ class BusSwitch(Bus):
         return self.buses[self.switch_bus.read_data()].read_data()
 
 
+# used to buffer the CU writing to the main bus so that it doesn't overide data
+class BusCopier:
+    def __init__(self, bus_from: Bus, bus_to: Bus, enable: Wire):
+        self.bus_from = bus_from
+        self.bus_to = bus_to
+        self.enable = enable
+        self.enable.enlist(self.execute)
+
+    def execute(self):
+        self.bus_to.set_data(self.bus_from.read_data())
+
+
 class Register:
     def __init__(self, in_bus: Bus, out_bus: Bus, read: Wire, write: Wire):
         self.in_bus = in_bus
