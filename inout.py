@@ -26,4 +26,4 @@ class Output:
         self.write_enable.enlist(self.write_from_bus)
 
     def write_from_bus(self):
-        print(self.in_bus.get_data())
+        print(chr(self.in_bus.read_data()), end="")
