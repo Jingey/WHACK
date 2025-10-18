@@ -6,8 +6,6 @@ class Wire:
         for func in self.funcs:
             func()
 
-        self.funcs = []
-
     def enlist(self, func):
         self.funcs.append(func)
 
