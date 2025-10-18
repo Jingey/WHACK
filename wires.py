@@ -1,9 +1,13 @@
 class Wire:
-    def __init__(self, funcs=None):
-        self.funcs: list = funcs if funcs is not None else []
+    def __init__(self):
+        self.funcs = []
+        self.late_funcs = []
 
     def enable(self):
         for func in self.funcs:
+            func()
+
+        for func in self.late_funcs:
             func()
 
     def enlist(self, func):
@@ -11,6 +15,12 @@ class Wire:
 
     def delist(self, func):
         self.funcs.remove(func)
+
+    def late_enlist(self, func):
+        self.late_funcs.append(func)
+
+    def late_delist(self, func):
+        self.late_funcs.remove(func)
 
 
 class Bus:
@@ -57,9 +67,9 @@ class Register:
     def __init__(self, in_bus: Bus, out_bus: Bus, read: Wire, write: Wire):
         self.in_bus = in_bus
         self.out_bus = out_bus
-        self.data = []
-        read.enlist(lambda _: self.read)
-        write.enlist(lambda _: self.write)
+        self.data = 0
+        read.enlist(self.read)
+        write.enlist(self.write)
 
     def read(self):
         self.data = self.in_bus.data
@@ -69,3 +79,24 @@ class Register:
 
     def clear(self):
         self.data = 0
+
+
+class Incrementer:
+    def __init__(self, reg: Register, inc: Wire):
+        self.reg = reg
+        self.inc = inc
+        self.inc.enlist(self.increment)
+
+    def increment(self):
+        self.reg.data += 1
+
+
+class FeStatus:
+    def __init__(self, clock: Wire):
+        self.data = 0
+        self.clock = clock
+        self.clock.late_enlist(self.increment)
+
+    def increment(self):
+        self.data += 1
+        self.data %= 4

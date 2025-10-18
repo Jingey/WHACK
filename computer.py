@@ -1,9 +1,15 @@
-from wires import Wire
+from wires import Wire, Bus
 from inout import Input, Output
 
 
 class Computer:
-    def __init__(self, clock: Wire, halt: Wire, input_reg: Input, output_reg: Output):
+    def __init__(
+        self,
+        clock: Wire,
+        halt: Wire,
+        input_reg: Input,
+        output_reg: Output,
+    ):
         self.clock = clock
         self.finished = False
         self.halt = halt
@@ -23,4 +29,4 @@ class Computer:
 
     def run(self):
         while not self.finished:
-            self.clock.enable()
+            self.run_cycle()

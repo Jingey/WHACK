@@ -1,7 +1,8 @@
 from alu import Alu
-from wires import Register, Bus, Wire, BusSwitch, BusCopier
+from wires import Register, Bus, Wire, BusSwitch, BusCopier, Incrementer, FeStatus
 from main_storage import MainStorage
 from inout import Input, Output
+from cu import Cu
 from computer import Computer
 
 
@@ -22,10 +23,10 @@ def build_computer(data: list[int]) -> Computer:
     alu = Alu(acc_bus, main_bus, func_bus, alu_enable, alu_out_bus)
 
     acc_in_select = Bus()
-    acc_in = BusSwitch([main_bus, alu_out_bus])
+    acc_in = BusSwitch([main_bus, alu_out_bus], acc_in_select)
 
     acc_out_select = Bus()
-    acc_out = BusSwitch([main_bus, acc_bus])
+    acc_out = BusSwitch([main_bus, acc_bus], acc_out_select)
 
     acc_read = Wire()
     acc_write = Wire()
@@ -53,12 +54,18 @@ def build_computer(data: list[int]) -> Computer:
     pc_read = Wire()
     pc_write = Wire()
     pc = Register(main_bus, main_bus, pc_read, pc_write)
+    pc_increment = Wire()
+    Incrementer(pc, pc_increment)
 
     read_input = Wire()
     input_reg = Input(read_input, main_bus)
 
     write_output = Wire()
-    output_reg = Input(write_output, main_bus)
+    output_reg = Output(write_output, main_bus)
+
+    ccr = alu.ccr
+
+    fe_status = FeStatus(clock)
 
     # CU out connections:
     # cu_bus - Bus: to send data to main bus (e.g. constants)
@@ -93,7 +100,38 @@ def build_computer(data: list[int]) -> Computer:
     # CU in connections:
     # cir - Register
     # clock - Wire: enabled to trigger each execution
-    # ccr - Register
+    # ccr - Bus
+    # fe_status - access with fe_status.data - prefetch(0), fetch(1), execute_1(2), execute_2(3)
+
+    cu = Cu(
+        cu_bus,
+        cu_bus_output,
+        func_bus,
+        alu_enable,
+        acc_in_select,
+        acc_out_select,
+        acc_read,
+        acc_write,
+        r1_read,
+        r1_write,
+        r1_read,
+        r2_write,
+        mar_enable,
+        main_store_enable,
+        rw_bus,
+        cir_read,
+        cir_write,
+        pc_read,
+        pc_write,
+        pc_increment,
+        read_input,
+        write_output,
+        halt,
+        cir,
+        clock,
+        ccr,
+        fe_status,
+    )
 
     main_store.load(data)
     return Computer(clock, halt, input_reg, output_reg)
