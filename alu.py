@@ -1,4 +1,5 @@
-from wires import Wire, Bus
+from wires import Wire, Bus, Register
+from enum import Enum
 
 # Arithmetic and logic unit
 # Connections: params p, q
@@ -9,31 +10,37 @@ MAX_VAL = 32_767
 MIN_VAL = -32_768
 
 
+class ALUFunction(Enum):
+    ADD = 0b000
+    SUB = 0b001
+    AND = 0b010
+    OR = 0b011
+    SHIFT = 0b100
+    NOT = 0b101
+
+
 class Alu:
-    def __init__(
-        self, p_bus: Bus, q_bus: Bus, func_bus: Bus, enable: Wire, out_bus: Bus
-    ):
-        self.p = p_bus
+    def __init__(self, acc: Register, q_bus: Bus, func_bus: Bus, enable: Wire):
+        self.acc = acc
         self.q = q_bus
         self.func = func_bus
         self.enable = enable
         self.enable.enlist(self.execute)
-        self.out = out_bus
         self.ccr = Bus()
 
     def execute(self):
         match self.func.data:
-            case 0:
+            case ALUFunction.ADD:
                 self.add()
-            case 1:
+            case ALUFunction.SUB:
                 self.subtract()
-            case 2:
+            case ALUFunction.SHIFT:
                 self.shift()
-            case 3:
+            case ALUFunction.NOT:
                 self.NOT()
-            case 4:
+            case ALUFunction.AND:
                 self.AND()
-            case 5:
+            case ALUFunction.OR:
                 self.OR()
             case _:
                 self.NOP()
@@ -56,25 +63,28 @@ class Alu:
 
         self.set_ccr(zero, carry, neg)
 
-        self.out.set_data(result)
+        self.acc.data = result
 
     def add(self):
-        self.set_result(self.p.data + self.q.data)
+        self.set_result(self.acc.data + self.q.data)
 
     def subtract(self):
-        self.out.set_data(self.p.data - self.q.data)
+        self.set_result(self.acc.data - self.q.data)
 
     def shift(self):
-        self.out.set_data(self.p.data >> self.q.data)
+        if (self.q.data & 0b10000) == 0:
+            self.set_result(self.acc.data << self.q.data)
+        else:
+            self.set_result(self.acc.data >> self.q.data)
 
     def NOT(self):
-        self.out.set_data(0b11111111_11111111 - self.p.data)
+        self.set_result(0b11111111_11111111 - self.acc.data)
 
     def AND(self):
-        self.out.set_data(self.p.data & self.q.data)
+        self.set_result(self.acc.data & self.q.data)
 
     def OR(self):
-        self.out.set_data(self.p.data | self.q.data)
+        self.set_result(self.acc.data | self.q.data)
 
     def NOP(self):
         return

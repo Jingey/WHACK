@@ -27,6 +27,11 @@ MOV - 0110
     includes the 0 register
     MOV R1 ACC // -> 0110_10_01_xxxxxxxxxx
 
+LS - 0111
+    takes one input
+    LS L 12 // -> 0111_0_1100_xxxxxxxxx
+    LS R 1 // -> 0111_1_0001_xxxxxxxx
+
 ADD - 1000
     takes a register or a literal
     ADD R1 // -> 0110_0_0_xxxxxxx

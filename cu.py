@@ -1,5 +1,5 @@
 from enum import Enum
-
+from alu import ALUFunction
 from wires import Wire, Bus, Register
 
 
@@ -17,6 +17,8 @@ class Opcode(Enum):
     AND = 0b1010
     OR = 0b1011
     NOT = 0b1100
+    INP = 0b1101
+    OUT = 0b1110
     HLT = 0b1111
 
 
@@ -27,8 +29,6 @@ class Cu:
         cu_bus_output: Wire,
         func_bus: Bus,
         alu_enable: Wire,
-        acc_in_select: Wire,
-        acc_out_select: Wire,
         acc_read: Wire,
         acc_write: Wire,
         r1_read: Wire,
@@ -55,8 +55,6 @@ class Cu:
         self.cu_bus_output = cu_bus_output
         self.func_bus = func_bus
         self.alu_enable = alu_enable
-        self.acc_in_select = acc_in_select
-        self.acc_out_select = acc_out_select
         self.acc_read = acc_read
         self.acc_write = acc_write
 
@@ -117,8 +115,170 @@ class Cu:
         self.cir_read.enable()
 
     def execute_1(self):
-        print(self.cir.data)
+        instruction = self.cir.data
+        op_code = instruction >> 12
+        operand = instruction & 0b1111_11111111
+
+        match op_code:
+            case Opcode.HLT:
+                self.halt()
+            case Opcode.JMP:
+                self.jmp_1(operand)
+            case Opcode.JEZ:
+                self.jmp_ez_1(operand)
+            case Opcode.JNZ:
+                self.jmp_nvg_1(operand)
+            case Opcode.STR:
+                self.str_1(operand)
+            case Opcode.LDR:
+                self.ldr_1(operand)
+            case Opcode.MOV:
+                self.mov_1(operand)
+            case Opcode.LS:
+                self.ls_1(operand)
+            case Opcode.ADD:
+                self.add_1(operand)
+            case Opcode.SUB:
+                self.sub_1(operand)
+            case Opcode.AND:
+                self.and_1(operand)
+            case Opcode.OR:
+                self.or_1(operand)
+            case Opcode.NOT:
+                self.not_1(operand)
+            case Opcode.INP:
+                self.inp_1(operand)
+            case Opcode.OUT:
+                self.out_1(operand)
+
+            case _:
+                # NOP
+                return
 
     def execute_2(self):
         if self.cir.data == 0:
             self.halt.enable()
+
+    def halt_1(self):
+        self.halt.enable()
+
+    def write_to_main_bus(self, data):
+        self.cu_bus.set_data(data)
+        self.cu_bus_output.enable()
+
+    def jmp_1(self, operand):
+        # load the address onto the main bus
+        self.write_to_main_bus(operand)
+        # read the main bus into the program counter
+        self.pc_read.enable()
+
+    def jmp_ez_1(self, operand):
+        # if last calculation is zero
+        if self.ccr & 0b100 == 0:
+            self.jmp_1(operand)
+
+    def jmp_nvg_1(self, operand):
+        # if last calculation is negative
+        if self.ccr & 0b001 == 0:
+            self.jmp_1(operand)
+
+    def send_to_register(self, destination_register):
+        if destination_register == 0:
+            self.r1_read.enable()
+        else:
+            self.r2_read.enable()
+
+    def send_from_register(self, source_register):
+        if source_register == 0:
+            self.r1_write.enable()
+        else:
+            self.r2_write.enable()
+
+    def load_into_mar(self, addr):
+        self.write_to_main_bus(addr)
+        self.mar_enable.enable()
+
+    def load_acc_into_mar(self):
+        self.acc_write.enable()
+        self.mar_enable.enable()
+
+    def str_ldr_address_handling(self, operand):
+        addr = operand & ((1 << 11) - 1)
+
+        if addr == 0b111_11111111:
+            self.load_acc_into_mar()
+        else:
+            self.load_into_mar(addr)
+
+    def str_1(self, operand):
+        self.str_ldr_address_handling(operand)
+
+        self.rw_bus.set_data(0)
+
+    def str_2(self, operand):
+        self.send_from_register(operand & (1 << 11))
+
+        self.main_store_enable()
+
+    def ldr_1(self, operand):
+        self.str_ldr_address_handling(operand)
+
+        self.rw_bus.set_data(1)
+
+    def ldr_2(self, operand):
+        self.main_store_enable()
+
+        self.send_to_register(operand & (1 << 11))
+
+    # from first -> second
+    def mov_1(self, operand):
+        first_reg = (operand >> 10) & 0b11
+        second_reg = (operand >> 8) & 0b11
+
+        if second_reg == 0:
+            return
+
+        match first_reg:
+            case 0b00:
+                self.write_to_main_bus(0)
+            case 0b01:
+                self.acc_write.enable()
+            case 0b10:
+                self.r1_write.enable()
+            case 0b11:
+                self.r2_write.enable()
+
+        match second_reg:
+            case 0b01:
+                self.acc_read.enable()
+            case 0b10:
+                self.r1_read.enable()
+            case 0b11:
+                self.r2_read.enable()
+
+    def ls_1(self, operand):
+        shift_amount = operand >> (12 - 5)
+        self.write_to_main_bus(shift_amount)
+        self.func_bus.set_data(ALUFunction.SHIFT)
+        self.alu_enable.enable()
+
+    def add_1(self, operand):
+        pass
+
+    def sub_1(self, operand):
+        pass
+
+    def and_1(self, operand):
+        pass
+
+    def or_1(self, operand):
+        pass
+
+    def not_1(self, operand):
+        pass
+
+    def inp_1(self, operand):
+        pass
+
+    def out_1(self, operand):
+        pass
