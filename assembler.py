@@ -10,8 +10,46 @@ class OpcodeError(Exception):
 class ParamError(Exception):
     pass
 
+
 class LineTooLongError(Exception):
     pass
+
+
+class InvalidLabelNameError(Exception):
+    pass
+
+
+invalid_labels = {"r1", "r2", "zero", "acc"}.union({i.value for i in Opcode})
+
+
+class UnevaluatedLabel:
+    def __init__(self, value: list[str]):
+        self.value = value
+
+    def pre_add(self, value):
+        self.value = [value] + self.value
+
+    def add_str(self, value):
+        self.value.append(value)
+
+    def evaluate(self, labels):
+        left = ""
+        right = ""
+        label = ""
+
+        for i in self.value:
+            if i in labels:
+                label = labels[i]
+            elif label == "":
+                left += i
+            else:
+                right += i
+
+        total_len = len(left) + len(right)
+
+        label = label.rjust(16 - total_len, "0")
+        return left + label + right
+
 
 class Assembler:
     """
@@ -24,20 +62,29 @@ class Assembler:
         self.labels = {}
 
     def add_label(self, label, param, line_num):
+        if not self.is_label(label):
+            raise InvalidLabelNameError()
         param = param.strip()
         if len(param) == 0:
-            self.labels[label] = format(line_num, 'b')
+            self.labels[label] = format(line_num, "b")
         else:
-            self.labels[label] = format(int(param), 'b')
+            self.labels[label] = format(int(param), "b")
+
+    def is_label(self, param):
+        try:
+            int(param)
+            return False
+        except:
+            pass
+        return param.lower() not in invalid_labels
 
     def opcode_param_to_bin(self, opcode, param):
         # Takes a standard parameter (R1, R2, ACC) and an opcode and converts that to bin.
 
-        if self.labels.get(param, None) is not None:
-            thingy = self.labels[param]
+        if self.is_label(param):
             if opcode.name == "ADD" or opcode.name == "SUB":
-                return "1" + thingy.zfill(11)
-            return self.labels[param].zfill(12)
+                return UnevaluatedLabel(["1", param])
+            return UnevaluatedLabel([param])
 
         other_thingy = None
         match opcode.name:
@@ -51,7 +98,7 @@ class Assembler:
                         return "01"
                     case "zero":
                         return "00"
-            case "ADD" | "SUB":
+            case "ADD" | "SUB" | "OR" | "AND":
                 match param.lower():
                     case "r1":
                         return "00"
@@ -91,6 +138,14 @@ class Assembler:
         if len(line) == 0:
             return None
 
+        if line[0] == '"' and line[-1] == '"':
+            return [format(ord(i), "b").rjust(16, "0") for i in line[1:-1]]
+
+        try:
+            return [format(int(line), "b").rjust(16, "0")]
+        except:
+            pass
+
         if ":" in line:
             label, param = line.split(":")
             self.add_label(label, param, line_num)
@@ -106,13 +161,25 @@ class Assembler:
             raise OpcodeError(f"Unknown opcode {code}")
 
         # Format the opcode to be 4 bits.
-        final = format(opcode.value, 'b').zfill(4)
+        final = format(opcode.value, "b").zfill(4)
 
         # Convert ref to address
         for i, arg in enumerate(params):
-            final += self.opcode_param_to_bin(opcode, arg)
+            result = self.opcode_param_to_bin(opcode, arg)
+            if isinstance(result, UnevaluatedLabel):
+                if isinstance(final, UnevaluatedLabel):
+                    for i in result.value:
+                        final.add_str(i)
+                else:
+                    result.pre_add(final)
+                    final = result
+            else:
+                if isinstance(final, UnevaluatedLabel):
+                    final.add_str(result)
+                else:
+                    final += result
 
-        return final.ljust(16, "0")
+        return [final]
 
     def assemble(self):
         with open(self.path, "r") as file:
@@ -120,13 +187,25 @@ class Assembler:
 
             final = []
             for line in lines:
-                n = self.process_line(line, len(final))
-                if n is not None:
-                    if len(n) > 16:
-                        raise LineTooLongError("WTF ARE YOU DOING BRO, THAT BINARY IS NOT HIPPITY SMALL ENOUGH")
+                arr = self.process_line(line, len(final))
+                if arr is None:
+                    continue
+
+                for n in arr:
                     final.append(n)
 
-            return final
+            final = [
+                i.evaluate(self.labels) if isinstance(i, UnevaluatedLabel) else i
+                for i in final
+            ]
+
+            for n in final:
+                if len(n) > 16:
+                    raise LineTooLongError(
+                        "WTF ARE YOU DOING BRO, THAT BINARY IS NOT HIPPITY SMALL ENOUGH"
+                    )
+
+            return [i.ljust(16, "0") for i in final]
 
     def run(self):
         bin_lines = self.assemble()

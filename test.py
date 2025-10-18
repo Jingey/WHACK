@@ -9,7 +9,7 @@ return computer.
 
 def build_bin_file(filepath):
     formatted_lines = []
-    with open(filepath, 'rb') as f:
+    with open(filepath, "rb") as f:
         lines = f.readlines()
         for line in lines:
             formatted_lines.append(int(line, 2))
@@ -25,7 +25,7 @@ def build(filepath):
     except (ParamError, OpcodeError, LineTooLongError) as e:
         raise e
     except Exception as e:
-        pass
+        raise e
 
     build_bin_file(filepath)
 

@@ -10,7 +10,7 @@ class Logger:
         self.base_logger = logging.getLogger()
 
     def log_clock(self):
-        self.base_logger.info("Next tick started")
+        self.base_logger.warning("Next tick started")
 
     def log_wire_notifying(self, wire):
         self.base_logger.info(f"Wire {wire.name} is enabled")

@@ -1,5 +1,6 @@
 from wires import Wire
 from inout import Input, Output
+from logs import log
 
 
 class Computer:
@@ -25,6 +26,7 @@ class Computer:
 
     def run_cycle(self):
         if not self.finished:
+            log.log_clock()
             self.clock.enable()
 
     def run(self):

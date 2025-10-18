@@ -1,15 +1,20 @@
 MOV zero ACC
-ADD 97
-MOV ACC R1
-MOV Zero ACC
-ADD 25
+ADD hello_world
 Loop:
+LDR R1
 MOV ACC R2
+MOV zero ACC
+ADD R1
+JEZ End
 OUT R1
-MOV R1 ACC
-ADD 1
-MOV ACC R1
 MOV R2 ACC
-SUB 1
-JNV Loop
+ADD 1
+JMP Loop
+
+End:
 HLT
+hello_world:
+"hello josh, you are my favourite friend"
+10
+13
+0
