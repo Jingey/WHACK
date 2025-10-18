@@ -1,25 +1,24 @@
 import random
-import pandas as pd
+import csv
 
 def getParam():
-    return random.randrange(0,1000)
+    return random.randrange(0,1000) 
 
 def getFunc():
-    return random.randrange(1,11)
+    return random.randrange(1,11) 
 
 
 def genData(name):
-    data = {}
+    with open(name, 'w', newline="") as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerow(["p", "q", "f", "out"])
+        for i in range(0, 10000):
+            f = getFunc()
+            p = getParam()
+            q = getParam()
 
-    for i in range(0, 10000):
-        f = getFunc()
-        p = getParam()
-        q = getParam()
+            if f > 0.5:
+                writer.writerow([p, q, f, p+q])
+            else:
+                writer.writerow([p, q, f, p-q])
 
-        if f >= 1 and f < 5:
-            data.update({i: {'p': p, 'q': q, 'f': f, 'out': p+q}})
-        else:
-            data.update({i: {'p': p, 'q': q, 'f': f, 'out':p-q}})
-
-    df = pd.DataFrame(data = data).T
-    df.to_csv(name)
