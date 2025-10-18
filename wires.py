@@ -1,16 +1,29 @@
 class Wire:
-    def __init__(self, funcs=None):
-        self.funcs: list = funcs if funcs is not None else []
+    def __init__(self):
+        self.funcs = []
+        self.late_funcs = []
 
     def enable(self):
         for func in self.funcs:
             func()
 
+<<<<<<< Updated upstream
+=======
+        for func in self.late_funcs:
+            func()
+
+>>>>>>> Stashed changes
     def enlist(self, func):
         self.funcs.append(func)
 
     def delist(self, func):
         self.funcs.remove(func)
+
+    def late_enlist(self, func):
+        self.late_funcs.append(func)
+
+    def late_delist(self, func):
+        self.late_funcs.remove(func)
 
 
 class Bus:
@@ -69,3 +82,24 @@ class Register:
 
     def clear(self):
         self.data = 0
+
+
+class Incrementer:
+    def __init__(self, reg: Register, inc: Wire):
+        self.reg = reg
+        self.inc = inc
+        self.inc.enlist(self.increment)
+
+    def increment(self):
+        self.reg.data += 1
+
+
+class FeStatus:
+    def __init__(self, clock: Wire):
+        self.data = 0
+        self.clock = clock
+        self.clock.late_enlist(self.increment)
+
+    def increment(self):
+        self.data += 1
+        self.data %= 4
