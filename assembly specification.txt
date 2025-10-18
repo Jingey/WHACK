@@ -1,0 +1,47 @@
+Registers:
+R1, R2, ACC
+ACC not always directly accessible
+
+
+NOP - 0000
+    takes no operands
+
+JMP - 0001, JEZ - 0010, JNV - 0011
+    takes an address or a label:
+    JMP 1203
+    JMP Loop
+
+STRI - 0100
+    takes a destination and an address/label:
+    STRI R1 230 // -> 0100_0_00001101001
+
+STR - 0100
+    takes a destination and uses the accumulator as the address
+    STR R2 // -> 0100_1_111111111111111
+
+LDR/LDRI - 0101
+    the same as STR/STRI
+
+MOV - 0110
+    takes two destinations to move about
+    includes the 0 register
+    MOV R1 ACC // -> 0110_10_01_xxxxxxxxxx
+
+ADD - 1000
+    takes a register or a literal
+    ADD R1 // -> 0110_0_0_xxxxxxx
+    ADD 2031 // -> 0110_1_010101001
+
+SUB - 1001, AND - 1010, OR - 1011
+    the same as ADD
+
+NOT - 11000
+    inverts acc, takes no operands
+
+INP - 1101
+    moves a character from the input queue to a register
+    INP R1
+
+OUT - 1110
+    moves a character from the register to the output buffer
+    OUT R2
