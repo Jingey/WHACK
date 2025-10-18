@@ -121,12 +121,12 @@ class Cu:
 
         match op_code:
             case Opcode.HLT.value:
-                self.halt()
+                self.halt_1()
             case Opcode.JMP.value:
                 self.jmp_1(operand)
             case Opcode.JEZ.value:
                 self.jmp_ez_1(operand)
-            case Opcode.JNZ.value:
+            case Opcode.JNV.value:
                 self.jmp_nvg_1(operand)
             case Opcode.STR.value:
                 self.str_1(operand)
@@ -222,9 +222,9 @@ class Cu:
         self.rw_bus.set_data(0)
 
     def str_2(self, operand):
-        self.send_from_register(operand & (1 << 11))
+        self.send_from_register((operand >> 11) & 1)
 
-        self.main_store_enable()
+        self.main_store_enable.enable()
 
     def ldr_1(self, operand):
         self.str_ldr_address_handling(operand)
@@ -232,9 +232,9 @@ class Cu:
         self.rw_bus.set_data(1)
 
     def ldr_2(self, operand):
-        self.main_store_enable()
+        self.main_store_enable.enable()
 
-        self.send_to_register(operand & (1 << 11))
+        self.send_to_register((operand >> 11) & 1)
 
     # from first -> second
     def mov_1(self, operand):
@@ -265,7 +265,7 @@ class Cu:
     def ls_1(self, operand):
         shift_amount = operand >> (12 - 5)
         self.write_to_main_bus(shift_amount)
-        self.func_bus.set_data(ALUFunction.SHIFT)
+        self.func_bus.set_data(ALUFunction.SHIFT.value)
         self.alu_enable.enable()
 
     def binary_operation(self, function, operand):
@@ -275,7 +275,7 @@ class Cu:
         else:
             self.write_to_main_bus(operand & ((1 << 11) - 1))
 
-        self.func_bus.set_data(function)
+        self.func_bus.set_data(function.value)
         self.alu_enable.enable()
 
     def add_1(self, operand):
@@ -285,16 +285,22 @@ class Cu:
         self.binary_operation(ALUFunction.ADD, operand)
 
     def and_1(self, operand):
-        pass
+        self.binary_operation(ALUFunction.AND, operand)
 
     def or_1(self, operand):
-        pass
+        self.binary_operation(ALUFunction.OR, operand)
 
     def not_1(self, operand):
-        pass
+        self.func_bus.set_data(ALUFunction.NOT.value)
+        self.alu_enable.enable()
 
     def inp_1(self, operand):
-        pass
+        self.read_input.enable()
+
+        self.send_to_register((operand >> 11) & 1)
+
 
     def out_1(self, operand):
-        pass
+        self.send_from_register((operand >> 11) & 1)
+
+        self.write_output.enable()

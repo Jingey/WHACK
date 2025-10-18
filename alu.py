@@ -27,13 +27,13 @@ class Alu:
         self.func = func_bus
         self.enable = enable
         self.enable.enlist(self.execute)
-        self.ccr = Bus()
+        self.ccr = Bus("ccr")
         self.emulator = AluEmulator()
 
     def execute(self):
         acc = self.acc.data
         q = self.q.data
-        func = self.func.read_data
+        func = self.func.read_data()
 
         log.log_alu_calculating(acc, q, func)
 
@@ -67,7 +67,6 @@ class AluEmulator:
         function = binary_input >> 32
         left = (binary_input >> 16) & 0xFF_FF
         right = binary_input & 0xFF_FF
-        print(left, right)
         match function:
             case ALUFunction.ADD.value:
                 return self.add(left, right)

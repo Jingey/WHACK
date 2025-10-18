@@ -10,6 +10,8 @@ class OpcodeError(Exception):
 class ParamError(Exception):
     pass
 
+class LineTooLongError(Exception):
+    pass
 
 class Assembler:
     """
@@ -37,6 +39,7 @@ class Assembler:
                 return "1" + thingy.zfill(11)
             return self.labels[param].zfill(12)
 
+        other_thingy = None
         match opcode.name:
             case "MOV":
                 match param.lower():
@@ -63,13 +66,18 @@ class Assembler:
                     case "r":
                         return "1"
                     case _:
-                        return format(int(param), "b").zfill(11)
+                        if int(param) > 16:
+                            raise ParamError("Param too big for logical shift.")
+                        return format(int(param), "b").ljust(11, "0")
             case _:
                 match param.lower():
                     case "r1":
-                        return "0"
+                        other_thingy = "0"
                     case "r2":
-                        return "1"
+                        other_thingy = "1"
+
+        if other_thingy is not None:
+            return other_thingy + ("1" * 11)
 
         return format(int(param), "b").zfill(12)
 
@@ -114,6 +122,8 @@ class Assembler:
             for line in lines:
                 n = self.process_line(line, len(final))
                 if n is not None:
+                    if len(n) > 16:
+                        raise LineTooLongError("WTF ARE YOU DOING BRO, THAT BINARY IS NOT HIPPITY SMALL ENOUGH")
                     final.append(n)
 
             return final
@@ -126,7 +136,11 @@ class Assembler:
             bin_lines[i] = bin_lines[i] + "\n"
 
         new_file.writelines(bin_lines)
+
+        path = new_file.name
         new_file.close()
+
+        return path
 
 
 if __name__ == "__main__":

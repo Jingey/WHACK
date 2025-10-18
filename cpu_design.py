@@ -18,11 +18,11 @@ def build_computer(data: list[int]) -> Computer:
     func_bus = Bus("alu_func_bus")
     alu_enable = Wire("alu_enable")
 
-    alu = Alu(main_bus, func_bus, alu_enable)
-
     acc_read = Wire("acc_read")
     acc_write = Wire("acc_write")
     acc = Register("acc", main_bus, main_bus, acc_read, acc_write)
+
+    alu = Alu(acc, main_bus, func_bus, alu_enable)
 
     r1_read = Wire("r1_read")
     r1_write = Wire("r1_write")

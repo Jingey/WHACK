@@ -3,6 +3,8 @@ import logging
 
 class Logger:
     def __init__(self):
+        with open("CPU.log", "w") as f:
+            f.write("")
         logging.basicConfig(filename="CPU.log", level=logging.INFO)
 
         self.base_logger = logging.getLogger()

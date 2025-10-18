@@ -68,12 +68,12 @@ class Register:
         write.enlist(self.write)
 
     def read(self):
+        self.data = self.in_bus.read_data()
         log.log_register_loaded(self)
-        self.data = self.in_bus.data
 
     def write(self):
         log.log_register_outputs(self)
-        self.out_bus.data = self.data
+        self.out_bus.set_data(self.data)
 
     def clear(self):
         self.data = 0
