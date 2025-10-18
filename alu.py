@@ -62,7 +62,7 @@ class AluEmulator:
         function = binary_input >> 32
         left = (binary_input >> 16) & 0xFF_FF
         right = binary_input & 0xFF_FF
-        print(left, right)
+        # print(left, right)
         match function:
             case ALUFunction.ADD.value:
                 return self.add(left, right)
