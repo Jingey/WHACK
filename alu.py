@@ -1,11 +1,11 @@
-from .wires import Wire, Bus
+from wires import Wire, Bus
 
 # Arithmetic and logic unit
 # Connections: params p, q
 # Functions: +, -, shift, not, and, or
 
 
-class alu:
+class Alu:
     def __init__(
         self, p_bus: Bus, q_bus: Bus, func_bus: Bus, enable: Wire, out_bus: Bus
     ):

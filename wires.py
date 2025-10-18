@@ -2,7 +2,7 @@ class Wire:
     def __init__(self, funcs=None):
         self.funcs: list = funcs if funcs is not None else []
 
-    def callAll(self, data):
+    def call_all(self, data):
         for func in self.funcs:
             func(data)
 
