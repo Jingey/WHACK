@@ -16,7 +16,7 @@ class MainStorage:
         self.address_bus = address_bus
         self.data_bus = data_bus
         self.rw_bus = rw_bus
-        self.mem = [0] * (2 ** 16)
+        self.mem = MainStorageLLM()
         self.enable.enlist(self.execute)
 
     def execute(self):
