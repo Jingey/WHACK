@@ -3,7 +3,10 @@ from alu import ALUFunction
 from wires import Wire, Bus, Register
 from ai_runner import AiRunner
 from logs import log
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 
 class Opcode(Enum):
     NOP = 0b0000
@@ -99,10 +102,17 @@ class Cu:
         self.clock.enlist(self.run)
 
         self.is_ai = is_ai
+<<<<<<< Updated upstream
 
         if is_ai:
             self.emulator = AiRunner("cu_model", 21, 41)
             # self.emulator = CuEmulator()
+=======
+        self.determanistic_emulator = CuEmulator()
+
+        if is_ai:
+            self.emulator = AiRunner("cu_model", 21, 41)
+>>>>>>> Stashed changes
         else:
             self.emulator = CuEmulator()
 
@@ -116,6 +126,14 @@ class Cu:
         result = self.emulator.run(bit_str)
         if self.is_ai:
             correct_result = self.determanistic_emulator.run(bit_str)
+<<<<<<< Updated upstream
+=======
+            if correct_result == result:
+                log.log_ai_correct()
+            else:
+                log.log_ai_incorrect(result, correct_result)
+        result = self.emulator.run(self.create_bit_str())
+>>>>>>> Stashed changes
         self.handle_result(result)
 
     def handle_result(self, result):

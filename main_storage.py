@@ -1,4 +1,4 @@
-from langchain_ollama import OllamaLLM
+#from langchain_ollama import OllamaLLM
 
 from wires import Wire, Bus
 from logs import log
@@ -41,32 +41,32 @@ class MainStorage:
             self.mem[i] = v
 
 
-class MainStorageLLM:
-    def __init__(self):
-        self.mem = []
-        self.llm = OllamaLLM(model="wizardlm2", temperature=0, reasoning=False)
+#class MainStorageLLM:
+    # def __init__(self):
+    #     self.mem = []
+    #     self.llm = OllamaLLM(model="wizardlm2", temperature=0, reasoning=False)
 
-    def __setitem__(self, key, value):
-        block = key // 4
-        offset = key % 4
-        if block + 1 > len(self.mem):
-            for i in range(block + 1 - len(self.mem)):
-                self.mem.append([0] * 4)
-        self.mem[block][offset] = value
+    # def __setitem__(self, key, value):
+    #     block = key // 4
+    #     offset = key % 4
+    #     if block + 1 > len(self.mem):
+    #         for i in range(block + 1 - len(self.mem)):
+    #             self.mem.append([0] * 4)
+    #     self.mem[block][offset] = value
 
-    def __getitem__(self, item):
-        result = 0
+    # def __getitem__(self, item):
+    #     result = 0
 
-        block = item // 4
-        offset = item % 4
+    #     block = item // 4
+    #     offset = item % 4
 
-        prompt = f"""Given the array A = {self.mem[block]} and the index {offset}, return only the integer at that index in the array.
-        Important: Output only the integer value at that index. Do not include any explanation, text, or punctuation. Just output the integer."""
+    #     prompt = f"""Given the array A = {self.mem[block]} and the index {offset}, return only the integer at that index in the array.
+    #     Important: Output only the integer value at that index. Do not include any explanation, text, or punctuation. Just output the integer."""
 
-        while result != self.mem[block][offset]:
-            prompt += f" The answer is not: {result}."
-            try:
-                result = int(self.llm.invoke(prompt))
-            except ValueError:
-                pass
-        return result
+    #     while result != self.mem[block][offset]:
+    #         prompt += f" The answer is not: {result}."
+    #         try:
+    #             result = int(self.llm.invoke(prompt))
+    #         except ValueError:
+    #             pass
+    #     return result

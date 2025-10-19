@@ -17,6 +17,12 @@ class CuModel(baseModel):
 
         arr = [
             tf.keras.layers.Dense(64, activation="relu"),
+<<<<<<< Updated upstream
+=======
+            tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dense(48, activation="relu"),
+>>>>>>> Stashed changes
             tf.keras.layers.Dense(48, activation="relu"),
             tf.keras.layers.Dense(35, activation="relu"),
             tf.keras.layers.Dense(41, activation="relu"),

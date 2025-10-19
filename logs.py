@@ -46,5 +46,10 @@ class Logger:
     def log_ms_save(self, addr, data):
         self.base_logger.info(f"Main store saved {data} to address {addr}")
 
+    def log_ai_correct(self):
+        self.base_logger.info(f"Correct")
+    def log_ai_incorrect(self, r1, r2):
+        self.base_logger.info(f"result {r1} correct {r2}")
+
 
 log: Logger = Logger()
