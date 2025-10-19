@@ -10,7 +10,7 @@ class AluModel(baseModel):
     def __init__(self):
         super().__init__(
             filename="ALUDATA.csv",
-            filesize=200_000,
+            filesize=10_000_00,
             i_size=35,
             o_size=19,
             add_func=getAluData,
@@ -19,8 +19,8 @@ class AluModel(baseModel):
         arr = [
             tf.keras.layers.Dense(64, activation="relu"),
             tf.keras.layers.Dense(48, activation="relu"),
-            tf.keras.layers.Dense(35, activation="relu"),
-            tf.keras.layers.Dense(19, activation="relu"),
+            tf.keras.layers.Dense(35, activation="sigmoid"),
+            tf.keras.layers.Dense(19, activation="sigmoid"),
         ]
 
         for elem in arr:
@@ -48,6 +48,6 @@ class AluModel(baseModel):
 if __name__ == "__main__":
     model = AluModel()
     model.compileModel()
-    model.makeModel(200, 10_000)
+    model.makeModel(800, 200_000)
     model.evaluateModel("ALUTESTDATA.csv")
     model.save_model("alu_model")
