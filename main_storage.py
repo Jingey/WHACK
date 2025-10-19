@@ -10,7 +10,7 @@ class MainStorage:
     """
 
     def __init__(
-        self, enable: Wire, address_bus: Bus, data_bus: Bus, rw_bus: Bus, is_ai: bool
+            self, enable: Wire, address_bus: Bus, data_bus: Bus, rw_bus: Bus, is_ai: bool
     ):
         self.enable = enable
         self.address_bus = address_bus

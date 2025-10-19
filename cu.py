@@ -98,11 +98,15 @@ class Cu:
 
         self.clock.enlist(self.run)
 
+        self.is_ai = is_ai
+
         if is_ai:
             self.emulator = AiRunner("cu_model", 21, 41)
             # self.emulator = CuEmulator()
         else:
             self.emulator = CuEmulator()
+
+        self.determanistic_emulator = CuEmulator()
 
     def create_bit_str(self):
         return (self.cir.data << 5) | (self.ccr.data << 2) | self.fe_status.data
@@ -112,10 +116,6 @@ class Cu:
         result = self.emulator.run(bit_str)
         if self.is_ai:
             correct_result = self.determanistic_emulator.run(bit_str)
-            if correct_result == result:
-                log.log_ai_correct()
-            else:
-                log.log_ai_incorrect(result, correct_result)
         self.handle_result(result)
 
     def handle_result(self, result):
