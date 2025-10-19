@@ -4,8 +4,8 @@ from genCUData import getCUData
 from genData import genData
 
 
-class CuModel:
-    def __init__(self, filename, filesize, i_size, o_size, add_func, arr):
+class baseModel:
+    def __init__(self, filename, filesize, i_size, o_size, add_func):
         self.FILENAME = filename
         self.SIZE = filesize
         self.COLNAMES = []
@@ -28,9 +28,13 @@ class CuModel:
         self.train_in = self.train_df[self.INPUTS]
         self.train_out = self.train_df[self.OUTPUTS]
         
-        self.model = tf.keras.Sequential(
-            arr
-        )
+        self.valid_in = self.validate_df[self.INPUTS]
+        self.valid_out = self.validate_df[self.OUTPUTS]
+
+
+        self.model = tf.keras.Sequential()
+        self.model.add(tf.keras.layers.Input(shape=(self.train_in.shape[1],)),
+    )
 
     def makeData(self):
         genData(self.FILENAME, self.SIZE, self.COLNAMES, self.addFunc)
@@ -40,12 +44,12 @@ class CuModel:
 
     def preProc(self, filename):
         df = pd.read_csv(filename, index_col=False)
-        train_df = df.sample(0.75)
+        train_df = df.sample(frac=0.75, random_state=42)
         validation_df = df.drop(train_df.index)
 
         return train_df, validation_df
 
-    def compileModel():
+    def compileModel(self):
         self.model.compile(
             optimizer = tf.keras.optimizers.RMSprop(),
             loss = tf.keras.losses.MeanSquaredError(), # Because gives calculate in range [0,1)
