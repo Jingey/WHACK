@@ -1,20 +1,13 @@
-MOV zero ACC
-ADD hello_world
-Loop:
-LDR R1
-MOV ACC R2
-MOV zero ACC
-ADD R1
-JEZ End
-OUT R1
-MOV R2 ACC
-ADD 1
-JMP Loop
-
-End:
+MOV R1 bob
+STK PUSH R1
+MOV ACC R1
+ADD 48
+IO W ACC
+STK POP R1
+JMP R1
 HLT
-hello_world:
-"hello josh, you are my favourite friend"
-10
-13
-0
+
+bob:
+MOV ACC 49
+IO W ACC
+HLT

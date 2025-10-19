@@ -64,8 +64,10 @@ class Register:
         self.out_bus = out_bus
         self.data = 0
         self.name = name
-        read.enlist(self.read)
-        write.enlist(self.write)
+        if read is not None:
+            read.enlist(self.read)
+        if write is not None:
+            write.enlist(self.write)
 
     def read(self):
         self.data = self.in_bus.read_data()
@@ -87,6 +89,16 @@ class Incrementer:
 
     def increment(self):
         self.reg.data += 1
+
+
+class Decrementer:
+    def __init__(self, reg: Register, dec: Wire):
+        self.reg = reg
+        self.dec = dec
+        self.dec.enlist(self.decrement)
+
+    def decrement(self):
+        self.reg.data -= 1
 
 
 class FeStatus:

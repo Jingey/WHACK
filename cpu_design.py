@@ -1,9 +1,11 @@
 from alu import Alu
-from wires import Register, Bus, Wire, BusCopier, Incrementer, FeStatus
+from wires import Register, Bus, Wire, BusCopier, Incrementer, FeStatus, Decrementer
 from main_storage import MainStorage
 from inout import Input, Output
 from cu import Cu
 from computer import Computer
+
+INITIAL_STACK_PTR = 2**16 - 1
 
 
 def build_computer(data: list[int]) -> Computer:
@@ -42,6 +44,15 @@ def build_computer(data: list[int]) -> Computer:
     cir_read = Wire("cir_read")
     cir_write = Wire("cir_write")
     cir = Register("cir", main_bus, main_bus, cir_read, cir_write)
+
+    stack_write = Wire("stack_write")
+    stack_increment = Wire("stack_increment")
+    stack_decrement = Wire("stack_decrement")
+    stack_ptr = Register("stack_ptr", None, main_bus, None, stack_write)
+    stack_ptr.data = INITIAL_STACK_PTR
+
+    Incrementer(stack_ptr, stack_increment)
+    Decrementer(stack_ptr, stack_decrement)
 
     pc_read = Wire("pc_read")
     pc_write = Wire("pc_write")
@@ -111,6 +122,9 @@ def build_computer(data: list[int]) -> Computer:
         rw_bus=rw_bus,
         cir_read=cir_read,
         cir_write=cir_write,
+        stack_write=stack_write,
+        stack_increment=stack_increment,
+        stack_decrement=stack_decrement,
         pc_read=pc_read,
         pc_write=pc_write,
         pc_increment=pc_increment,
