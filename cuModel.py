@@ -9,7 +9,7 @@ class CuModel(baseModel):
     def __init__(self):
         super().__init__(
             filename="CUDATA.csv",
-            filesize=1000,
+            filesize=20000,
             i_size=21,
             o_size=41,
             add_func=getCUData
@@ -47,4 +47,4 @@ class CuModel(baseModel):
 model = CuModel()
 model.compileModel()
 model.makeModel(800, 8000)
-model.evaluateModel()
+model.evaluateModel("CUTESTDATA.cv")
