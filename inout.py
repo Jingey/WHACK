@@ -10,9 +10,8 @@ class Input:
 
     def write_to_bus(self):
         if len(self.queue) == 0:
-            self.queue.extend(input())
-            if len(self.queue) == 0:
-                self.queue.append(0)
+            self.queue.extend(map(ord, input()))
+            self.queue.append(0)
         self.out_bus.set_data(self.queue[0])
         del self.queue[0]
 

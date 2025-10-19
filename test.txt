@@ -1,13 +1,79 @@
-MOV R1 bob
+// print hello
+MOV R1 finish_intro
 STK PUSH R1
-MOV ACC R1
-ADD 48
-IO W ACC
-STK POP R1
-JMP R1
+MOV R1 str_1
+JMP print_str
+finish_intro:
+
+// get name
+MOV R1 finish_input
+STK PUSH R1
+MOV R1 input_buffer
+JMP read_line
+finish_input:
+
+MOV R1 finish_str_2
+STK PUSH R1
+MOV R1 str_2
+JMP print_str
+finish_str_2:
+
+MOV R1 finish_print_buffer
+STK PUSH R1
+MOV R1 input_buffer
+JMP print_str
+finish_print_buffer:
+
+MOV R1 finish_str_3
+STK PUSH R1
+MOV R1 str_3
+JMP print_str
+finish_str_3:
 HLT
 
-bob:
-MOV ACC 49
+// pass in a pointer to the buffer in r1, put the return addr on the stack
+read_line:
+read_line_loop:
+IO R R2
+MOV ACC R1
+STR R2
+ADD 1
+MOV R1 ACC
+MOV ACC R2
+ADD 0
+JEZ function_finished
+JMP read_line_loop
+
+// pass in the pointer in r1 with the return addr on the stack
+print_str:
+print_str_loop:
+MOV ACC R1
+LDR R2
+MOV ACC R2
+ADD 0
+JEZ function_finished
 IO W ACC
-HLT
+MOV ACC R1
+ADD 1
+MOV R1 ACC
+JMP print_str_loop
+
+
+function_finished:
+STK POP R1
+JMP R1
+
+
+
+// DATA:
+str_1:
+"what is your name?\n\0"
+
+str_2:
+"your name is \0"
+
+str_3:
+"!\nWelcome!\n\0"
+
+input_buffer:
+0

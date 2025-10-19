@@ -10,6 +10,7 @@ JMP - 0001, JEZ - 0010, JNV - 0011
     takes an address, label, or reg:
     JMP 1203
     JMP Loop
+    JMP R1
 
 STRI - 0100
     takes a destination and an address/label:

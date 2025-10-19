@@ -98,9 +98,9 @@ class Assembler:
                     case "r2":
                         return pre_pend + "11"
                     case "acc":
-                        return pre_pend + "0"
+                        return pre_pend + "00"
                     case _:
-                        return format(int(param), "b").zfill(11)
+                        return format(int(param), "b").zfill(10)
             case "ADD" | "SUB" | "OR" | "AND":
                 match param.lower():
                     case "r1":
