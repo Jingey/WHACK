@@ -6,4 +6,3 @@ def genData(name, sz, first, func):
         writer.writerow(first)
         for i in range(0, sz):
             writer.writerow(func());
-
