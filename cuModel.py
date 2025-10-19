@@ -17,14 +17,8 @@ class CuModel(baseModel):
 
         arr = [
             tf.keras.layers.Dense(64, activation="relu"),
-<<<<<<< HEAD
-            tf.keras.layers.Dense(64, activation="relu"),
-            tf.keras.layers.Dense(64, activation="relu"),
-            tf.keras.layers.Dense(48, activation="relu"),
-=======
             tf.keras.layers.Dense(48, activation="relu"),
             tf.keras.layers.Dense(35, activation="relu"),
->>>>>>> parent of 951d979 (CU WORKSJKFDSFKMS)
             tf.keras.layers.Dense(41, activation="relu"),
         ]
 

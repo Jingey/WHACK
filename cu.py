@@ -2,6 +2,7 @@ from enum import Enum
 from alu import ALUFunction
 from wires import Wire, Bus, Register
 from ai_runner import AiRunner
+from logs import log
 
 
 class Opcode(Enum):
@@ -98,8 +99,8 @@ class Cu:
         self.clock.enlist(self.run)
 
         if is_ai:
-            # self.emulator = AiRunner("cu_model", 21, 41)
-            self.emulator = CuEmulator()
+            self.emulator = AiRunner("cu_model", 21, 41)
+            # self.emulator = CuEmulator()
         else:
             self.emulator = CuEmulator()
 
@@ -107,7 +108,6 @@ class Cu:
         return (self.cir.data << 5) | (self.ccr.data << 2) | self.fe_status.data
 
     def run(self):
-<<<<<<< HEAD
         bit_str = self.create_bit_str()
         result = self.emulator.run(bit_str)
         if self.is_ai:
@@ -116,9 +116,6 @@ class Cu:
                 log.log_ai_correct()
             else:
                 log.log_ai_incorrect(result, correct_result)
-=======
-        result = self.emulator.run(self.create_bit_str())
->>>>>>> parent of 951d979 (CU WORKSJKFDSFKMS)
         self.handle_result(result)
 
     def handle_result(self, result):
