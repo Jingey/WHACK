@@ -15,8 +15,7 @@ valid = {
 def getRandomInt():
     while True:
         res = random.randrange(0, 1 << 35)
-        if (res >> 32) in valid:
-            return res
+        return res & 0xFF_FF
 
 
 def to_list_bin(val, padding):

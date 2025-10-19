@@ -107,7 +107,18 @@ class Cu:
         return (self.cir.data << 5) | (self.ccr.data << 2) | self.fe_status.data
 
     def run(self):
+<<<<<<< HEAD
+        bit_str = self.create_bit_str()
+        result = self.emulator.run(bit_str)
+        if self.is_ai:
+            correct_result = self.determanistic_emulator.run(bit_str)
+            if correct_result == result:
+                log.log_ai_correct()
+            else:
+                log.log_ai_incorrect(result, correct_result)
+=======
         result = self.emulator.run(self.create_bit_str())
+>>>>>>> parent of 951d979 (CU WORKSJKFDSFKMS)
         self.handle_result(result)
 
     def handle_result(self, result):
