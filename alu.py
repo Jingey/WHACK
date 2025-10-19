@@ -29,8 +29,8 @@ class Alu:
         self.enable.enlist(self.execute)
         self.ccr = Bus("ccr")
         if is_ai:
-            self.emulator = AiRunner("alu_model", 35, 19)
-            # self.emulator = AluEmulator()
+            # self.emulator = AiRunner("alu_model", 35, 19)
+            self.emulator = AluEmulator()
         else:
             self.emulator = AluEmulator()
 

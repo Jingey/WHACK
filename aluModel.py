@@ -18,9 +18,10 @@ class AluModel(baseModel):
 
         arr = [
             tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dense(64, activation="relu"),
             tf.keras.layers.Dense(48, activation="relu"),
-            tf.keras.layers.Dense(35, activation="sigmoid"),
-            tf.keras.layers.Dense(19, activation="sigmoid"),
+            tf.keras.layers.Dense(19, activation="relu"),
         ]
 
         for elem in arr:
@@ -48,6 +49,6 @@ class AluModel(baseModel):
 if __name__ == "__main__":
     model = AluModel()
     model.compileModel()
-    model.makeModel(800, 200_000)
+    model.makeModel(800, 150_000)
     model.evaluateModel("ALUTESTDATA.csv")
     model.save_model("alu_model")
