@@ -13,7 +13,6 @@ class baseModel:
         self.OUTPUTS = []
         self.addFunc = add_func
 
-
         for i in range(i_size):
             self.COLNAMES.append(f"in_{i}")
             self.INPUTS.append(f"in_{i}")
@@ -27,14 +26,14 @@ class baseModel:
 
         self.train_in = self.train_df[self.INPUTS]
         self.train_out = self.train_df[self.OUTPUTS]
-        
+
         self.valid_in = self.validate_df[self.INPUTS]
         self.valid_out = self.validate_df[self.OUTPUTS]
 
-
         self.model = tf.keras.Sequential()
-        self.model.add(tf.keras.layers.Input(shape=(self.train_in.shape[1],)),
-    )
+        self.model.add(
+            tf.keras.layers.Input(shape=(self.train_in.shape[1],)),
+        )
 
     def makeData(self):
         genData(self.FILENAME, self.SIZE, self.COLNAMES, self.addFunc)
@@ -51,19 +50,22 @@ class baseModel:
 
     def compileModel(self):
         self.model.compile(
-            optimizer = tf.keras.optimizers.RMSprop(),
-            loss = tf.keras.losses.MeanSquaredError(), # Because gives calculate in range [0,1)
-            metrics  = [tf.keras.metrics.BinaryAccuracy(name="binary_accuracy", dtype=None, threshold=0.5)]
+            optimizer=tf.keras.optimizers.RMSprop(),
+            loss=tf.keras.losses.MeanSquaredError(),  # Because gives calculate in range [0,1)
+            metrics=[
+                tf.keras.metrics.BinaryAccuracy(
+                    name="binary_accuracy", dtype=None, threshold=0.5
+                )
+            ],
         )
-        
 
     def makeModel(self, E, B):
         losses = self.model.fit(
             self.train_in,
             self.train_out,
-            validation_data = (self.valid_in, self.valid_out),
-            epochs = E,
-            batch_size = B,
+            validation_data=(self.valid_in, self.valid_out),
+            epochs=E,
+            batch_size=B,
         )
 
         print(losses.history)
@@ -76,5 +78,10 @@ class baseModel:
         self.to = self.testUnits[self.OUTPUTS]
 
         loss, accuracy = self.model.evaluate(self.ti, self.to)
-        print(f"Losses Mean Squared Error: {loss}, Accuracy Mean Absolute Error: {accuracy}")
+        print(
+            f"Losses Mean Squared Error: {loss}, Accuracy Mean Absolute Error: {accuracy}"
+        )
         print(self.model(self.ti.head(1)))
+
+    def save_model(self, file_name):
+        self.model.save(f"{file_name}.keras")

@@ -8,7 +8,7 @@ from computer import Computer
 INITIAL_STACK_PTR = 2**16 - 1
 
 
-def build_computer(data: list[int]) -> Computer:
+def build_computer(data: list[int], is_ai: bool) -> Computer:
     main_bus = Bus("main_bus")
     clock = Wire("clock")
     halt = Wire("halt")
@@ -24,7 +24,7 @@ def build_computer(data: list[int]) -> Computer:
     acc_write = Wire("acc_write")
     acc = Register("acc", main_bus, main_bus, acc_read, acc_write)
 
-    alu = Alu(acc, main_bus, func_bus, alu_enable)
+    alu = Alu(acc, main_bus, func_bus, alu_enable, is_ai)
 
     r1_read = Wire("r1_read")
     r1_write = Wire("r1_write")
@@ -39,7 +39,7 @@ def build_computer(data: list[int]) -> Computer:
     mar_enable = Wire("mar_enable")
     BusCopier(main_bus, addr_bus, mar_enable)
     rw_bus = Bus("rw_bus")
-    main_store = MainStorage(main_store_enable, addr_bus, main_bus, rw_bus)
+    main_store = MainStorage(main_store_enable, addr_bus, main_bus, rw_bus, is_ai)
 
     cir_read = Wire("cir_read")
     cir_write = Wire("cir_write")
@@ -135,6 +135,7 @@ def build_computer(data: list[int]) -> Computer:
         clock=clock,
         ccr=ccr,
         fe_status=fe_status,
+        is_ai=is_ai,
     )
 
     main_store.load(data)

@@ -1,5 +1,5 @@
 import random
-from alu import AluEmulator,ALUFunction
+from alu import AluEmulator, ALUFunction
 
 alu = AluEmulator()
 
@@ -8,19 +8,22 @@ valid = {
     ALUFunction.SUB.value,
     ALUFunction.AND.value,
     ALUFunction.OR.value,
-    ALUFunction.NOT.value,
+    # ALUFunction.NOT.value,
 }
+
 
 def getRandomInt():
     while True:
-        res = random.randrange(0, 1 << 34)
+        res = random.randrange(0, 1 << 35)
         if (res >> 32) in valid:
             return res
+
 
 def to_list_bin(val, padding):
     val_str = bin(val)[2:]
     res = [int(i) for i in val_str]
     return ([0] * (padding - len(res))) + res
+
 
 def getAluData():
     code = getRandomInt()

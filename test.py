@@ -14,7 +14,8 @@ def build_bin_file(filepath):
         for line in lines:
             formatted_lines.append(int(line, 2))
 
-    computer = build_computer(formatted_lines)
+    computer = build_computer(formatted_lines, True)
+    print("BEGINING EXECUTION")
     computer.run()
 
 

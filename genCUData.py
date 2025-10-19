@@ -4,13 +4,16 @@ from cu import CuEmulator
 
 cu = CuEmulator()
 
+
 def getRandomInt():
-    return random.randrange(0, 1 << 20)
+    return random.randrange(0, 1 << 21)
+
 
 def to_list_bin(val, padding):
     val_str = bin(val)[2:]
     res = [int(i) for i in val_str]
     return ([0] * (padding - len(res))) + res
+
 
 def getCUData():
     code = make_valid_bit_string(getRandomInt())

@@ -2,6 +2,8 @@ from wires import Wire, Bus, Register
 from enum import Enum
 from logs import log
 
+from ai_runner import AiRunner
+
 # Arithmetic and logic unit
 # Connections: params p, q
 # Functions: +, -, shift, not, and, or
@@ -17,14 +19,20 @@ class ALUFunction(Enum):
 
 
 class Alu:
-    def __init__(self, acc: Register, q_bus: Bus, func_bus: Bus, enable: Wire):
+    def __init__(
+        self, acc: Register, q_bus: Bus, func_bus: Bus, enable: Wire, is_ai: bool
+    ):
         self.acc = acc
         self.q = q_bus
         self.func = func_bus
         self.enable = enable
         self.enable.enlist(self.execute)
         self.ccr = Bus("ccr")
-        self.emulator = AluEmulator()
+        if is_ai:
+            self.emulator = AiRunner("alu_model", 35, 19)
+            # self.emulator = AluEmulator()
+        else:
+            self.emulator = AluEmulator()
 
     def execute(self):
         acc = self.acc.data

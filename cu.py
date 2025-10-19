@@ -1,6 +1,7 @@
 from enum import Enum
 from alu import ALUFunction
 from wires import Wire, Bus, Register
+from ai_runner import AiRunner
 
 
 class Opcode(Enum):
@@ -53,6 +54,7 @@ class Cu:
         clock: Wire,
         ccr: Bus,
         fe_status: Register,
+        is_ai: bool,
     ):
         self.cu_bus = cu_bus
         self.cu_bus_output = cu_bus_output
@@ -95,7 +97,11 @@ class Cu:
 
         self.clock.enlist(self.run)
 
-        self.emulator = CuEmulator()
+        if is_ai:
+            # self.emulator = AiRunner("cu_model", 21, 41)
+            self.emulator = CuEmulator()
+        else:
+            self.emulator = CuEmulator()
 
     def create_bit_str(self):
         return (self.cir.data << 5) | (self.ccr.data << 2) | self.fe_status.data
