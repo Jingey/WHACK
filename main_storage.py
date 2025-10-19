@@ -65,6 +65,8 @@ class MainStorageLLM:
 
         while result != self.mem[block][offset]:
             prompt += f" The answer is not: {result}."
-            result = int(self.llm.invoke(prompt))
-
+            try:
+                result = int(self.llm.invoke(prompt))
+            except ValueError:
+                pass
         return result
