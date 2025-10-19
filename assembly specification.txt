@@ -7,7 +7,7 @@ NOP - 0000
     takes no operands
 
 JMP - 0001, JEZ - 0010, JNV - 0011
-    takes an address or a label:
+    takes an address, label, or reg:
     JMP 1203
     JMP Loop
 
@@ -25,7 +25,10 @@ LDR/LDRI - 0101
 MOV - 0110
     takes two destinations to move about
     includes the 0 register
-    MOV R1 ACC // -> 0110_10_01_xxxxxxxxxx
+    takes, destination then source
+    MOV R1 ACC // -> 0110_10_1_0_xxxxxxx
+    MOV ACC 2932 // -> 0110_01_0_literal
+    MOV R2 R1 // -> 0110_11_1_10_xxxxx
 
 LS - 0111
     takes one input
@@ -43,10 +46,14 @@ SUB - 1001, AND - 1010, OR - 1011
 NOT - 1100
     inverts acc, takes no operands
 
-INP - 1101
+IO - 1101
     moves a character from the input queue to a register
-    INP R1 // -> 1101_0_xxxxxxxxxxx
+    or from a register to the output queue
+    IO R R1 // -> 1101_0_0_xxxxxxxxx
+    IO W R1 // -> 1101_1_0_xxxxxxxxx
 
-OUT - 1110
-    moves a character from the register to the output buffer
-    OUT R2
+
+STK - 1110
+    pushes or pops values from the stack (grows down)
+    STK PUSH R1 // -> 1110_0_0_xxxxxxxx
+    STK POP R1 // ->1110_1_0_xxxxxxxx

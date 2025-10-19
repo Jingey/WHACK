@@ -1,4 +1,4 @@
-import opcode
+import codecs
 
 from cu import Opcode
 
@@ -19,7 +19,9 @@ class InvalidLabelNameError(Exception):
     pass
 
 
-invalid_labels = {"r1", "r2", "zero", "acc"}.union({i.value for i in Opcode})
+invalid_labels = {"r1", "r2", "zero", "acc", "r", "w", "push", "pop"}.union(
+    {i.value for i in Opcode}
+)
 
 
 class UnevaluatedLabel:
@@ -78,7 +80,7 @@ class Assembler:
             pass
         return param.lower() not in invalid_labels
 
-    def opcode_param_to_bin(self, opcode, param):
+    def opcode_param_to_bin(self, opcode, param, cur):
         # Takes a standard parameter (R1, R2, ACC) and an opcode and converts that to bin.
 
         if self.is_label(param):
@@ -89,15 +91,16 @@ class Assembler:
         other_thingy = None
         match opcode.name:
             case "MOV":
+                pre_pend = "" if len(cur) == 4 else "1"
                 match param.lower():
                     case "r1":
-                        return "10"
+                        return pre_pend + "10"
                     case "r2":
-                        return "11"
+                        return pre_pend + "11"
                     case "acc":
-                        return "01"
-                    case "zero":
-                        return "00"
+                        return pre_pend + "0"
+                    case _:
+                        return format(int(param), "b").zfill(11)
             case "ADD" | "SUB" | "OR" | "AND":
                 match param.lower():
                     case "r1":
@@ -116,6 +119,18 @@ class Assembler:
                         if int(param) > 16:
                             raise ParamError("Param too big for logical shift.")
                         return format(int(param), "b").ljust(11, "0")
+            case "IO" | "STK":
+                match param.lower():
+                    case "r" | "push":
+                        return "0"
+                    case "w" | "pop":
+                        return "1"
+                    case "r1":
+                        return "0110"
+                    case "r2":
+                        return "0111"
+                    case "acc":
+                        return "010"
             case _:
                 match param.lower():
                     case "r1":
@@ -137,9 +152,15 @@ class Assembler:
         line = line.strip()
         if len(line) == 0:
             return None
+        line = line.split("//")[0].strip()
+        if len(line) == 0:
+            return None
 
         if line[0] == '"' and line[-1] == '"':
-            return [format(ord(i), "b").rjust(16, "0") for i in line[1:-1]]
+            return [
+                format(ord(i), "b").rjust(16, "0")
+                for i in codecs.getdecoder("unicode_escape")(line[1:-1])[0]
+            ]
 
         try:
             return [format(int(line), "b").rjust(16, "0")]
@@ -165,7 +186,7 @@ class Assembler:
 
         # Convert ref to address
         for i, arg in enumerate(params):
-            result = self.opcode_param_to_bin(opcode, arg)
+            result = self.opcode_param_to_bin(opcode, arg, final)
             if isinstance(result, UnevaluatedLabel):
                 if isinstance(final, UnevaluatedLabel):
                     for i in result.value:

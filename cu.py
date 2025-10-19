@@ -17,8 +17,8 @@ class Opcode(Enum):
     AND = 0b1010
     OR = 0b1011
     NOT = 0b1100
-    INP = 0b1101
-    OUT = 0b1110
+    IO = 0b1101
+    STK = 0b1110
     HLT = 0b1111
 
 
@@ -40,6 +40,9 @@ class Cu:
         rw_bus: Bus,
         cir_read: Wire,
         cir_write: Wire,
+        stack_write: Wire,
+        stack_increment: Wire,
+        stack_decrement: Wire,
         pc_read: Wire,
         pc_write: Wire,
         pc_increment: Wire,
@@ -71,6 +74,10 @@ class Cu:
         self.cir_read = cir_read
         self.cir_write = cir_write
 
+        self.stack_write = stack_write
+        self.stack_increment = stack_increment
+        self.stack_decrement = stack_decrement
+
         self.pc_read = pc_read
         self.pc_write = pc_write
         self.pc_increment = pc_increment
@@ -98,25 +105,29 @@ class Cu:
         self.handle_result(result)
 
     def handle_result(self, result):
-        self.cu_bus.set_data(result >> 22)
-        self.func_bus.set_data((result >> 19) & 0b111)
-        cu_bus_output = (result >> 18) & 1
-        alu_enable = (result >> 17) & 1
-        acc_read = (result >> 16) & 1
-        acc_write = (result >> 15) & 1
+        self.cu_bus.set_data(result >> 25)
+        self.func_bus.set_data((result >> 22) & 0b111)
+        cu_bus_output = (result >> 21) & 1
+        alu_enable = (result >> 20) & 1
+        acc_read = (result >> 19) & 1
+        acc_write = (result >> 18) & 1
 
         # General purpose registers
-        r1_read = (result >> 14) & 1
-        r1_write = (result >> 13) & 1
-        r2_read = (result >> 12) & 1
-        r2_write = (result >> 11) & 1
+        r1_read = (result >> 17) & 1
+        r1_write = (result >> 16) & 1
+        r2_read = (result >> 15) & 1
+        r2_write = (result >> 14) & 1
 
-        mar_enable = (result >> 10) & 1
-        main_store_enable = (result >> 9) & 1
-        rw_bus = (result >> 8) & 1
+        mar_enable = (result >> 13) & 1
+        main_store_enable = (result >> 12) & 1
+        rw_bus = (result >> 11) & 1
 
-        cir_read = (result >> 7) & 1
-        cir_write = (result >> 6) & 1
+        cir_read = (result >> 10) & 1
+        cir_write = (result >> 9) & 1
+
+        stack_write = (result >> 8) & 1
+        stack_increment = (result >> 7) & 1
+        stack_decrement = (result >> 6) & 1
 
         pc_read = (result >> 5) & 1
         pc_write = (result >> 4) & 1
@@ -131,8 +142,12 @@ class Cu:
             self.halt.enable()
             return
 
-        if rw_bus == 1:
-            self.rw_bus.set_data(rw_bus)
+        self.rw_bus.set_data(rw_bus)
+
+        if stack_increment == 1:
+            self.stack_increment.enable()
+        if stack_decrement == 1:
+            self.stack_decrement.enable()
 
         # All writes to main bus
         if cu_bus_output == 1:
@@ -151,6 +166,8 @@ class Cu:
             self.pc_write.enable()
         if cir_write == 1:
             self.cir_write.enable()
+        if stack_write == 1:
+            self.stack_write.enable()
 
         if alu_enable == 1:
             self.alu_enable.enable()
@@ -182,7 +199,7 @@ class CuEmulator:
         pass
 
     # CIR 16 bits | CCR 3 bits | FE_Status 2 bits
-    # returns 38 bits
+    # returns 41 bits
     def run(self, bit_str: int):
         # Inputs
         self.cir = bit_str >> 5
@@ -211,6 +228,10 @@ class CuEmulator:
         self.cir_read = 0
         self.cir_write = 0
 
+        self.stack_write = 0
+        self.stack_increment = 0
+        self.stack_decrement = 0
+
         self.pc_read = 0
         self.pc_write = 0
         self.pc_increment = 0
@@ -237,6 +258,9 @@ class CuEmulator:
                 self.rw_bus,
                 self.cir_read,
                 self.cir_write,
+                self.stack_write,
+                self.stack_increment,
+                self.stack_decrement,
                 self.pc_read,
                 self.pc_write,
                 self.pc_increment,
@@ -246,7 +270,7 @@ class CuEmulator:
             ]
         )
 
-        return (self.cu_bus << 22) | (self.func_bus << 19) | base
+        return (self.cu_bus << 25) | (self.func_bus << 22) | base
 
     def bit_pack(self, res: list[int]):
         result = 0
@@ -312,10 +336,10 @@ class CuEmulator:
                 self.or_1(operand)
             case Opcode.NOT.value:
                 self.not_1(operand)
-            case Opcode.INP.value:
-                self.inp_1(operand)
-            case Opcode.OUT.value:
-                self.out_1(operand)
+            case Opcode.IO.value:
+                self.io_1(operand)
+            case Opcode.STK.value:
+                self.stk_1(operand)
 
             case _:
                 # NOP
@@ -330,6 +354,8 @@ class CuEmulator:
                 self.str_2(operand)
             case Opcode.LDR.value:
                 self.ldr_2(operand)
+            case Opcode.STK.value:
+                self.stk_2(operand)
 
     def halt_1(self):
         self.halt = 1
@@ -339,6 +365,14 @@ class CuEmulator:
         self.cu_bus_output = 1
 
     def jmp_1(self, operand):
+        addr = operand & ((1 << 11) - 1)
+
+        if addr == 0b111_11111111:
+            reg = (operand >> 11) & 1
+            self.send_from_register(reg)
+            self.mar_enable = 1
+        else:
+            self.load_into_mar(addr)
         # load the address onto the main bus
         self.write_to_main_bus(operand)
         # read the main bus into the program counter
@@ -402,29 +436,18 @@ class CuEmulator:
 
     # from first -> second
     def mov_1(self, operand):
-        first_reg = (operand >> 10) & 0b11
-        second_reg = (operand >> 8) & 0b11
+        destination_reg = (operand >> 10) & 0b11
+        kind = (operand >> 9) & 1
+        literal = operand & 0b1_11111111
+        source_reg = (operand >> 7) & 0b11
 
-        if second_reg == 0:
+        self.send_to_compond_register(destination_reg)
+
+        if kind == 0:
+            self.write_to_main_bus(literal)
             return
 
-        match first_reg:
-            case 0b00:
-                self.write_to_main_bus(0)
-            case 0b01:
-                self.acc_write = 1
-            case 0b10:
-                self.r1_write = 1
-            case 0b11:
-                self.r2_write = 1
-
-        match second_reg:
-            case 0b01:
-                self.acc_read = 1
-            case 0b10:
-                self.r1_read = 1
-            case 0b11:
-                self.r2_read = 1
+        self.send_from_compond_register(source_reg)
 
     def ls_1(self, operand):
         shift_amount = operand >> (12 - 5)
@@ -454,16 +477,73 @@ class CuEmulator:
     def or_1(self, operand):
         self.binary_operation(ALUFunction.OR, operand)
 
-    def not_1(self, operand):
+    def not_1(self, _):
         self.func_bus = ALUFunction.NOT.value
         self.alu_enable = 1
 
-    def inp_1(self, operand):
-        self.read_input = 1
+    def send_from_compond_register(self, register):
+        match register:
+            case 0b00 | 0b01:
+                self.acc_write = 1
+            case 0b10:
+                self.r1_write = 1
+            case 0b11:
+                self.r2_write = 1
 
-        self.send_to_register((operand >> 11) & 1)
+    def send_to_compond_register(self, register):
+        match register:
+            case 0b00 | 0b01:
+                self.acc_read = 1
+            case 0b10:
+                self.r1_read = 1
+            case 0b11:
+                self.r2_read = 1
 
-    def out_1(self, operand):
-        self.send_from_register((operand >> 11) & 1)
+    def io_1(self, operand):
+        if (operand >> 11) & 1 == 1:
+            self.send_from_compond_register((operand >> 7) & 0b11)
+            self.write_output = 1
 
-        self.write_output = 1
+        else:
+            self.read_input = 1
+            self.send_to_register((operand >> 7) & 0b11)
+
+    def stk_1(self, operand):
+        operation = (operand >> 11) & 1
+
+        if operation == 1:
+            self.pop_1()
+        else:
+            self.push_1()
+
+    def stk_2(self, operand):
+        operation = (operand >> 11) & 1
+        reg = (operand >> 7) & 0b11
+
+        if operation == 1:
+            self.pop_2(reg)
+        else:
+            self.push_2(reg)
+
+    def pop_1(self):
+        self.mar_enable = 1
+        self.stack_write = 1
+
+    def pop_2(self, reg):
+        self.stack_increment = 1
+
+        self.rw_bus = 1
+        self.main_store_enable = 1
+
+        self.send_to_compond_register(reg)
+
+    def push_1(self):
+        self.stack_decrement = 1
+
+        self.mar_enable = 1
+        self.stack_write = 1
+
+    def push_2(self, reg):
+        self.rw_bus = 0
+        self.main_store_enable = 1
+        self.send_from_compond_register(reg)

@@ -18,9 +18,6 @@ class Computer:
         self.output_reg = output_reg
         halt.enlist(self.halted)
 
-    def give_input(self, data: int):
-        self.input_reg.take_input(data)
-
     def halted(self):
         self.finished = True
 
